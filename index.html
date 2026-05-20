@@ -207,6 +207,7 @@
     <button class="nav-tab admin-only" data-tab="teamtable" onclick="switchTab(this,'teamtable')" style="display:none">👥 Bảng Công Nhóm</button>
     <button class="nav-tab admin-only" data-tab="projects" onclick="switchTab(this,'projects')" style="display:none">🗂 Dự Án</button>
     <button class="nav-tab admin-only" data-tab="hrprofile" onclick="switchTab(this,'hrprofile')" style="display:none">👤 Nhân Sự</button>
+    <button class="nav-tab admin-only" data-tab="warnings" onclick="switchTab(this,'warnings');loadWarnings()" style="display:none">⚠️ Cảnh Báo</button>
   </div>
 
   <div class="content">
@@ -334,6 +335,15 @@
       </div>
     </div>
 
+  <!-- WARNINGS TAB -->
+    <div class="tab-pane" id="tab-warnings">
+      <div class="card">
+        <div class="card-title">⚠️ Phát hiện chấm công hộ</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Danh sách các trường hợp nhiều tài khoản chấm công từ cùng một thiết bị trong cùng một ngày.</p>
+        <div id="warningList" class="empty-state"><div class="empty-icon">✅</div>Chưa phát hiện trường hợp bất thường</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -347,6 +357,15 @@ const GOOGLE_CLIENT_ID = '775858800222-r25d91n7qa5454aqhb2ni6q77kds2hns.apps.goo
 const APP_URL = 'https://letrananhtoankts.github.io/VELA_CHAMCONG/index.html';
 
 const DAYS = ['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
+
+// Lấy ngày local (tránh lệch UTC+7)
+function localDateStr(date) {
+  const d = date || new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
 const MONTHS_VI = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
 
 let state = { session: null, currentUser: null, projects: [], users: [], checkedInToday: false, lastAttData: null, lastTeamData: null };
@@ -616,7 +635,7 @@ function startClock() {
 
 // ── CHECK TODAY ──
 async function checkTodayAttendance() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDateStr();
   try {
     const rows = await sbFetch(`attendance?user_id=eq.${state.currentUser.id}&check_date=eq.${today}&limit=1`);
     if (rows.length) {
@@ -627,6 +646,24 @@ async function checkTodayAttendance() {
       btn.classList.add('done'); btn.querySelector('.btn-label').textContent='ĐÃ CHẤM';
     }
   } catch(e) { console.error(e); }
+}
+
+// ── DEVICE FINGERPRINT ──
+async function getDeviceFingerprint() {
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl');
+  const debugInfo = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
+  const gpu = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'unknown';
+  const data = [
+    navigator.userAgent, navigator.language,
+    screen.width + 'x' + screen.height, screen.colorDepth,
+    new Date().getTimezoneOffset(),
+    navigator.hardwareConcurrency || 0,
+    navigator.deviceMemory || 0, gpu
+  ].join('|');
+  let hash = 0;
+  for (let i = 0; i < data.length; i++) { hash = ((hash << 5) - hash) + data.charCodeAt(i); hash |= 0; }
+  return Math.abs(hash).toString(16).padStart(8,'0');
 }
 
 // ── GEOFENCING ──
@@ -660,16 +697,33 @@ async function doCheckin() {
       btn.disabled=false; return;
     }
     try {
-      const today=new Date().toISOString().split('T')[0];
+      const today=localDateStr();
+      const fingerprint = await getDeviceFingerprint();
+      // Check if another user already checked in from this device today
+      const sameDevice = await sbFetch(`attendance?check_date=eq.${today}&device_fingerprint=eq.${fingerprint}&user_id=neq.${state.currentUser.id}&limit=5`);
+      if (sameDevice.length > 0) {
+        const names = sameDevice.map(r => {
+          const u = state.users.find(x => x.id === r.user_id);
+          return u ? u.full_name : 'Người khác';
+        }).join(', ');
+        result.innerHTML = `⚠️ <strong>Cảnh báo:</strong> Thiết bị này hôm nay đã được dùng để chấm công cho: <strong>${names}</strong>. Đã ghi nhận và báo cáo HR.`;
+        showToast('⚠️ Phát hiện chấm công hộ — đã cảnh báo HR');
+      }
       await sbFetch('attendance',{method:'POST',body:JSON.stringify({
         user_id:state.currentUser.id,project_id:projectId,check_date:today,
-        check_time:new Date().toISOString(),lat:latitude,lng:longitude,distance_m:dist,status:'present'
+        check_time:new Date().toISOString(),lat:latitude,lng:longitude,distance_m:dist,
+        status:'present',device_fingerprint:fingerprint,
+        is_suspicious: sameDevice.length > 0
       })});
       state.checkedInToday=true;
       btn.classList.add('done'); btn.querySelector('.btn-label').textContent='ĐÃ CHẤM';
       const now=new Date();
       result.innerHTML=`✅ Chấm công thành công lúc <strong>${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</strong> — cách ${dist}m`;
       showToast('✅ Chấm công thành công!');
+      // Auto-refresh bảng công tháng này
+      const nowD = new Date();
+      document.getElementById('myMonth').value = nowD.getMonth()+1;
+      document.getElementById('myYear').value = nowD.getFullYear();
     } catch(e) {
       if (e.message.includes('unique')) { result.innerHTML='⚠️ Đã chấm công hôm nay rồi'; state.checkedInToday=true; }
       else result.innerHTML='❌ '+e.message;
@@ -701,7 +755,7 @@ async function loadMyAttendance() {
   const el=document.getElementById('myTableContent');
   el.innerHTML='<div class="loading"><span class="spinner"></span> Đang tải...</div>';
   const startDate=`${year}-${String(month).padStart(2,'0')}-01`;
-  const endDate=new Date(year,month,0).toISOString().split('T')[0];
+  const endDate=localDateStr(new Date(year,month,0));
   try {
     const rows=await sbFetch(`attendance?user_id=eq.${state.currentUser.id}&check_date=gte.${startDate}&check_date=lte.${endDate}&order=check_date`);
     state.lastAttData={rows,month,year,user:state.currentUser};
@@ -719,7 +773,7 @@ function renderMyTable(rows,month,year) {
   for(let d=1;d<=daysInMonth;d++) {
     const dateStr=`${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const dt=new Date(dateStr);
-    const isWe=dt.getDay()===0||dt.getDay()===6;
+    const isWe=dt.getDay()===0; // Chi CN nghi, T7 di lam
     const r=byDate[dateStr];
     let bClass='',bLabel='';
     if(r){[bClass,bLabel]=statusMap[r.status]||['','—'];if(r.status==='present')present++;else if(r.status==='absent')absent++;else if(r.status==='leave')leave++;}
@@ -728,7 +782,7 @@ function renderMyTable(rows,month,year) {
     tableRows+=`<tr style="${isWe?'opacity:.45':''}">
       <td style="font-family:monospace">${d}</td>
       <td>${DAYS[dt.getDay()]}</td>
-      <td>${r?`<span class="badge ${bClass}">${bLabel}</span>`:(isWe?'<span style="color:var(--text3);font-size:11px">Cuối tuần</span>':'<span class="badge badge-absent">— Chưa có</span>')}</td>
+      <td>${r?`<span class="badge ${bClass}">${bLabel}</span>`:(isWe?'<span style="color:var(--text3);font-size:11px">Chủ nhật</span>':'<span class="badge badge-absent">— Chưa có</span>')}</td>
       <td style="font-family:monospace;font-size:12px">${ct?`${ct.getHours()}:${String(ct.getMinutes()).padStart(2,'0')}`:'—'}</td>
       <td style="font-size:12px;color:var(--text3)">${r?.distance_m?r.distance_m+'m':'—'}</td>
       <td style="font-size:12px;color:var(--text3)">${proj?proj.code:'—'}</td>
@@ -752,7 +806,7 @@ async function loadTeamAttendance() {
   const el=document.getElementById('teamTableContent');
   el.innerHTML='<div class="loading"><span class="spinner"></span> Đang tải...</div>';
   const startDate=`${year}-${String(month).padStart(2,'0')}-01`;
-  const endDate=new Date(year,month,0).toISOString().split('T')[0];
+  const endDate=localDateStr(new Date(year,month,0));
   const daysInMonth=new Date(year,month,0).getDate();
   try {
     let userUrl='users?is_active=eq.true&order=full_name';
@@ -773,7 +827,7 @@ async function loadTeamAttendance() {
 function renderTeamTable(users,attByUser,month,year,daysInMonth,el) {
   const dayHeaders=Array.from({length:daysInMonth},(_,i)=>{
     const d=new Date(year,month-1,i+1);
-    const isWe=d.getDay()===0||d.getDay()===6;
+    const isWe=d.getDay()===0; // Chi CN
     return `<th style="text-align:center;${isWe?'color:var(--text3)':''}">${i+1}</th>`;
   }).join('');
   const tableRows=users.map(u=>{
@@ -782,7 +836,7 @@ function renderTeamTable(users,attByUser,month,year,daysInMonth,el) {
     const cells=Array.from({length:daysInMonth},(_,i)=>{
       const dateStr=`${year}-${String(month).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;
       const dt=new Date(dateStr);
-      const isWe=dt.getDay()===0||dt.getDay()===6;
+      const isWe=dt.getDay()===0; // Chi CN nghi, T7 di lam
       const r=att[dateStr];
       if(r?.status==='present'||r?.status==='leave') total++;
       const cell=r?(r.status==='present'?'✅':r.status==='leave'?'🏖':'❌'):(isWe?'':' ');
@@ -806,7 +860,7 @@ function exportMyExcel() {
   for(let d=1;d<=daysInMonth;d++){
     const dateStr=`${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const dt=new Date(dateStr);
-    const isWe=dt.getDay()===0||dt.getDay()===6;
+    const isWe=dt.getDay()===0; // Chi CN nghi, T7 di lam
     const r=byDate[dateStr];
     const ct=r?new Date(r.check_time):null;
     const proj=state.projects.find(p=>p.id===r?.project_id);
@@ -842,6 +896,45 @@ function exportTeamExcel() {
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,`T${month}_${year}`);
   XLSX.writeFile(wb,`BangCong_Nhom_T${month}_${year}${proj?'_'+proj.code:''}.xlsx`);
+}
+
+// ── WARNINGS ──
+async function loadWarnings() {
+  const el = document.getElementById('warningList'); if(!el) return;
+  el.innerHTML = '<div class="loading"><span class="spinner"></span> Đang tải...</div>';
+  try {
+    const rows = await sbFetch('attendance?is_suspicious=eq.true&order=check_date.desc&limit=100');
+    if(!rows.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div>Chưa phát hiện trường hợp bất thường</div>';
+      return;
+    }
+    // Group by fingerprint + date
+    const groups = {};
+    rows.forEach(r => {
+      const key = r.device_fingerprint + '_' + r.check_date;
+      if(!groups[key]) groups[key] = [];
+      groups[key].push(r);
+    });
+    const cards = Object.entries(groups).map(([key, items]) => {
+      const names = items.map(r => {
+        const u = state.users.find(x => x.id === r.user_id);
+        return u ? u.full_name : r.user_id;
+      });
+      const date = items[0].check_date;
+      const fp = items[0].device_fingerprint;
+      return `<div style="background:rgba(232,85,85,.08);border:1px solid rgba(232,85,85,.25);border-radius:12px;padding:16px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="color:var(--red);font-weight:600;font-size:14px">⚠️ Chấm công hộ nghi ngờ</span>
+          <span style="font-family:monospace;font-size:12px;color:var(--text3)">${date}</span>
+        </div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:6px">
+          <strong style="color:var(--text)">${names.join(' & ')}</strong> — cùng thiết bị
+        </div>
+        <div style="font-size:11px;color:var(--text3);font-family:monospace">Device ID: ${fp}</div>
+      </div>`;
+    }).join('');
+    el.innerHTML = cards;
+  } catch(e) { el.innerHTML = '<div class="empty-state">❌ ' + e.message + '</div>'; }
 }
 
 // ── TABS ──
