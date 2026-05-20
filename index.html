@@ -5,604 +5,151 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0f1923">
 <title>Vela ChamCong</title>
-<link rel="manifest" href="manifest.json">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
-
   :root {
-    --bg: #0f1923;
-    --bg2: #162030;
-    --bg3: #1e2d40;
-    --border: #2a3d54;
-    --accent: #f5a623;
-    --accent2: #e8961a;
-    --green: #27c47a;
-    --red: #e85555;
-    --blue: #4a9eff;
-    --text: #e8edf2;
-    --text2: #8fa8c0;
-    --text3: #5a7a96;
-    --card-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --bg:#0f1923;--bg2:#162030;--bg3:#1e2d40;--border:#2a3d54;
+    --accent:#f5a623;--accent2:#e8961a;--green:#27c47a;--red:#e85555;--blue:#4a9eff;
+    --text:#e8edf2;--text2:#8fa8c0;--text3:#5a7a96;--card-shadow:0 4px 24px rgba(0,0,0,0.4);
   }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* LOGIN */
+  #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0a1220,#0f1923,#162030);position:relative}
+  #loginScreen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(245,166,35,.08),transparent 60%),radial-gradient(ellipse at 70% 20%,rgba(74,158,255,.06),transparent 50%)}
+  .login-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:48px 40px;width:100%;max-width:420px;position:relative;box-shadow:var(--card-shadow)}
+  .login-logo{text-align:center;margin-bottom:32px}
+  .logo-mark{display:inline-flex;align-items:center;gap:10px;margin-bottom:8px}
+  .logo-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+  .logo-text{font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.5px}
+  .logo-sub{font-size:13px;color:var(--text3);letter-spacing:.5px;text-transform:uppercase}
+  .divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text3);font-size:12px}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+  .btn-google{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:13px;color:var(--text);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;margin-bottom:16px}
+  .btn-google:hover{border-color:var(--accent);background:var(--bg2)}
+  .google-icon{width:20px;height:20px}
+  .field-group{margin-bottom:16px}
+  .field-group label{display:block;font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+  .field-group input,.field-group select,.field-group textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:inherit;font-size:15px;outline:none;transition:border-color .2s}
+  .field-group input:focus,.field-group select:focus,.field-group textarea:focus{border-color:var(--accent)}
+  .field-group textarea{resize:vertical;min-height:80px}
+  .btn-primary{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;padding:14px;color:#0f1923;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s}
+  .btn-primary:hover{opacity:.9}
+  .btn-primary:active{transform:scale(.98)}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed}
 
-  body {
-    font-family: 'Be Vietnam Pro', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+  /* TOPBAR */
+  #mainApp{display:none}
+  .topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .topbar-left{display:flex;align-items:center;gap:10px}
+  .topbar-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .topbar-title{font-size:16px;font-weight:700}
+  .topbar-right{display:flex;align-items:center;gap:10px}
+  .user-badge{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:6px 12px 6px 8px;font-size:13px;color:var(--text2)}
+  .avatar{width:24px;height:24px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--bg)}
+  .btn-logout{background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--text3);font-family:inherit;font-size:12px;cursor:pointer;transition:all .2s}
+  .btn-logout:hover{border-color:var(--red);color:var(--red)}
 
-  /* ===== LOGIN ===== */
-  #loginScreen {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #0a1220 0%, #0f1923 50%, #162030 100%);
-    position: relative;
-  }
-  #loginScreen::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at 30% 50%, rgba(245,166,35,0.08) 0%, transparent 60%),
-                radial-gradient(ellipse at 70% 20%, rgba(74,158,255,0.06) 0%, transparent 50%);
-  }
-  .login-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 48px 40px;
-    width: 100%;
-    max-width: 400px;
-    position: relative;
-    box-shadow: var(--card-shadow);
-  }
-  .login-logo {
-    text-align: center;
-    margin-bottom: 32px;
-  }
-  .login-logo .logo-mark {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
-  .logo-icon {
-    width: 44px; height: 44px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-  }
-  .logo-text {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.5px;
-  }
-  .logo-sub {
-    font-size: 13px;
-    color: var(--text3);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-  .field-group { margin-bottom: 20px; }
-  .field-group label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 8px;
-  }
-  .field-group input, .field-group select {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 16px;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 15px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .field-group input:focus, .field-group select:focus {
-    border-color: var(--accent);
-  }
-  .btn-primary {
-    width: 100%;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none;
-    border-radius: 10px;
-    padding: 14px;
-    color: #0f1923;
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s;
-    margin-top: 8px;
-  }
-  .btn-primary:hover { opacity: 0.9; }
-  .btn-primary:active { transform: scale(0.98); }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  /* NAV */
+  .nav-tabs{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 20px;gap:4px}
+  .nav-tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+  .nav-tab:hover{color:var(--text2)}
+  .nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 
-  /* ===== MAIN APP ===== */
-  #mainApp { display: none; }
+  /* CONTENT */
+  .content{padding:20px;max-width:960px;margin:0 auto}
+  .tab-pane{display:none}
+  .tab-pane.active{display:block}
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:var(--card-shadow)}
+  .card-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:20px}
 
-  .topbar {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 0 20px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .topbar-logo {
-    width: 32px; height: 32px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-  }
-  .topbar-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text);
-  }
-  .topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .user-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 6px 12px 6px 8px;
-    font-size: 13px;
-    color: var(--text2);
-  }
-  .avatar {
-    width: 24px; height: 24px;
-    background: var(--accent);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--bg);
-  }
-  .btn-logout {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 12px;
-    color: var(--text3);
-    font-family: inherit;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-logout:hover { border-color: var(--red); color: var(--red); }
+  /* CHECKIN */
+  .checkin-hero{text-align:center;padding:32px 16px}
+  .date-display{font-size:13px;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:6px}
+  .time-display{font-size:52px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text);letter-spacing:-2px;line-height:1;margin-bottom:4px}
+  .day-display{font-size:15px;color:var(--text2);margin-bottom:28px}
+  .project-selector{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+  .project-selector select{background:none;border:none;color:var(--text);font-family:inherit;font-size:15px;font-weight:500;outline:none;flex:1;cursor:pointer}
+  .project-selector select option{background:var(--bg3)}
+  .location-status{display:flex;align-items:center;gap:10px;background:var(--bg3);border-radius:12px;padding:12px 18px;margin-bottom:24px;font-size:13px;color:var(--text2)}
+  .loc-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .loc-dot.checking{background:var(--accent);animation:pulse 1s infinite}
+  .loc-dot.ok{background:var(--green)}
+  .loc-dot.fail{background:var(--red)}
+  .loc-dot.idle{background:var(--text3)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .btn-checkin{width:170px;height:170px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;margin:0 auto 20px;box-shadow:0 0 0 16px rgba(245,166,35,.08),0 0 0 32px rgba(245,166,35,.04);transition:transform .2s,box-shadow .2s;font-family:inherit}
+  .btn-checkin:hover{transform:scale(1.04);box-shadow:0 0 0 20px rgba(245,166,35,.12),0 0 0 40px rgba(245,166,35,.06)}
+  .btn-checkin:active{transform:scale(.97)}
+  .btn-checkin:disabled{opacity:.5;cursor:not-allowed;transform:none}
+  .btn-checkin .btn-icon{font-size:38px}
+  .btn-checkin .btn-label{font-size:14px;font-weight:700;color:var(--bg)}
+  .btn-checkin.done{background:linear-gradient(135deg,var(--green),#1fa864);box-shadow:0 0 0 16px rgba(39,196,122,.08),0 0 0 32px rgba(39,196,122,.04)}
+  .checkin-result{background:var(--bg3);border-radius:12px;padding:14px 20px;font-size:14px;color:var(--text2);text-align:center;min-height:50px;display:flex;align-items:center;justify-content:center}
 
-  /* ===== NAV TABS ===== */
-  .nav-tabs {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    overflow-x: auto;
-    padding: 0 20px;
-    gap: 4px;
-  }
-  .nav-tab {
-    padding: 12px 20px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text3);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    white-space: nowrap;
-    transition: all 0.2s;
-    background: none;
-    border-top: none;
-    border-left: none;
-    border-right: none;
-    font-family: inherit;
-  }
-  .nav-tab:hover { color: var(--text2); }
-  .nav-tab.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-  }
+  /* TABLE */
+  .month-nav{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+  .month-nav select{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:inherit;font-size:14px;outline:none}
+  .btn-load{background:var(--accent);border:none;border-radius:8px;padding:8px 18px;color:var(--bg);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .2s}
+  .btn-load:hover{opacity:.85}
+  .btn-export{background:var(--bg3);border:1px solid var(--green);border-radius:8px;padding:8px 18px;color:var(--green);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+  .btn-export:hover{background:rgba(39,196,122,.1)}
+  .att-table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;padding:10px 12px;color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);white-space:nowrap}
+  td{padding:11px 12px;border-bottom:1px solid rgba(42,61,84,.5);color:var(--text2);vertical-align:middle}
+  tr:hover td{background:rgba(255,255,255,.02)}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+  .badge-present{background:rgba(39,196,122,.15);color:var(--green)}
+  .badge-absent{background:rgba(232,85,85,.15);color:var(--red)}
+  .badge-leave{background:rgba(74,158,255,.15);color:var(--blue)}
+  .badge-holiday{background:rgba(245,166,35,.15);color:var(--accent)}
 
-  /* ===== CONTENT ===== */
-  .content { padding: 24px 20px; max-width: 900px; margin: 0 auto; }
-  .tab-pane { display: none; }
-  .tab-pane.active { display: block; }
+  /* STATS */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px}
+  .stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+  .stat-value{font-size:26px;font-weight:700;font-family:'JetBrains Mono',monospace;margin-bottom:4px}
+  .stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--text3)}
 
-  /* ===== CARDS ===== */
-  .card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 16px;
-    box-shadow: var(--card-shadow);
-  }
-  .card-title {
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: var(--text3);
-    margin-bottom: 20px;
-  }
+  /* PROJECTS */
+  .project-list{display:grid;gap:10px}
+  .project-item{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px}
+  .project-item .pcode{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);background:rgba(245,166,35,.1);border-radius:6px;padding:4px 8px;flex-shrink:0}
+  .project-item .pinfo{flex:1}
+  .project-item .pname{font-weight:600;font-size:14px;color:var(--text)}
+  .project-item .paddr{font-size:12px;color:var(--text3);margin-top:2px}
+  .project-item .pradius{font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;flex-shrink:0}
+  .btn-icon-sm{background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text3);font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit}
+  .btn-icon-sm:hover{border-color:var(--red);color:var(--red)}
+  .btn-edit-sm{background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text3);font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit}
+  .btn-edit-sm:hover{border-color:var(--accent);color:var(--accent)}
 
-  /* ===== CHECKIN TAB ===== */
-  .checkin-hero {
-    text-align: center;
-    padding: 40px 20px;
-  }
-  .checkin-hero .date-display {
-    font-size: 14px;
-    color: var(--text3);
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-  }
-  .checkin-hero .time-display {
-    font-size: 48px;
-    font-weight: 700;
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--text);
-    letter-spacing: -2px;
-    margin-bottom: 4px;
-    line-height: 1;
-  }
-  .checkin-hero .day-display {
-    font-size: 15px;
-    color: var(--text2);
-    margin-bottom: 32px;
-  }
+  /* HR */
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:600px){.form-row{grid-template-columns:1fr}}
+  .admin-form{display:grid;gap:14px}
+  .btn-secondary{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 20px;color:var(--text2);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s}
+  .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
 
-  .project-selector {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .project-selector select {
-    background: none;
-    border: none;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 500;
-    outline: none;
-    flex: 1;
-    cursor: pointer;
-  }
-  .project-selector select option { background: var(--bg3); }
+  /* MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+  .modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+  .modal-title{font-size:16px;font-weight:700;margin-bottom:20px;color:var(--text)}
+  .modal-actions{display:flex;gap:10px;margin-top:20px}
 
-  .location-status {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--bg3);
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 24px;
-    font-size: 13px;
-  }
-  .loc-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .loc-dot.checking { background: var(--accent); animation: pulse 1s infinite; }
-  .loc-dot.ok { background: var(--green); }
-  .loc-dot.fail { background: var(--red); }
-  .loc-dot.idle { background: var(--text3); }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-  .btn-checkin {
-    width: 180px; height: 180px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin: 0 auto 24px;
-    box-shadow: 0 0 0 16px rgba(245,166,35,0.08), 0 0 0 32px rgba(245,166,35,0.04);
-    transition: transform 0.2s, box-shadow 0.2s;
-    font-family: inherit;
-  }
-  .btn-checkin:hover {
-    transform: scale(1.04);
-    box-shadow: 0 0 0 20px rgba(245,166,35,0.12), 0 0 0 40px rgba(245,166,35,0.06);
-  }
-  .btn-checkin:active { transform: scale(0.97); }
-  .btn-checkin:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-  .btn-checkin .btn-icon { font-size: 40px; }
-  .btn-checkin .btn-label {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--bg);
-  }
-  .btn-checkin.done {
-    background: linear-gradient(135deg, var(--green), #1fa864);
-    box-shadow: 0 0 0 16px rgba(39,196,122,0.08), 0 0 0 32px rgba(39,196,122,0.04);
-  }
-
-  .checkin-result {
-    background: var(--bg3);
-    border-radius: 12px;
-    padding: 16px 20px;
-    font-size: 14px;
-    color: var(--text2);
-    text-align: center;
-    min-height: 52px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* ===== ATTENDANCE TABLE ===== */
-  .month-nav {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-  .month-nav select {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 12px;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-    outline: none;
-  }
-  .btn-load {
-    background: var(--accent);
-    border: none;
-    border-radius: 8px;
-    padding: 8px 16px;
-    color: var(--bg);
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-  .btn-load:hover { opacity: 0.85; }
-
-  .att-table-wrap { overflow-x: auto; }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  th {
-    text-align: left;
-    padding: 10px 12px;
-    color: var(--text3);
-    font-weight: 600;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  td {
-    padding: 12px 12px;
-    border-bottom: 1px solid rgba(42,61,84,0.5);
-    color: var(--text2);
-    vertical-align: middle;
-  }
-  tr:hover td { background: rgba(255,255,255,0.02); }
-
-  .badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-  .badge-present { background: rgba(39,196,122,0.15); color: var(--green); }
-  .badge-absent { background: rgba(232,85,85,0.15); color: var(--red); }
-  .badge-leave { background: rgba(74,158,255,0.15); color: var(--blue); }
-  .badge-adjusted { background: rgba(245,166,35,0.15); color: var(--accent); }
-
-  /* ===== ADMIN PANEL ===== */
-  .admin-form {
-    display: grid;
-    gap: 16px;
-  }
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
-
-  .field-group textarea {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 16px;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-    outline: none;
-    resize: vertical;
-    min-height: 80px;
-    transition: border-color 0.2s;
-  }
-  .field-group textarea:focus { border-color: var(--accent); }
-
-  .btn-secondary {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 20px;
-    color: var(--text2);
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-
-  .btn-danger {
-    background: rgba(232,85,85,0.1);
-    border: 1px solid rgba(232,85,85,0.3);
-    border-radius: 10px;
-    padding: 12px 20px;
-    color: var(--red);
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-danger:hover { background: rgba(232,85,85,0.2); }
-
-  /* ===== STATS ===== */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-  .stat-card {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    text-align: center;
-  }
-  .stat-value {
-    font-size: 28px;
-    font-weight: 700;
-    font-family: 'JetBrains Mono', monospace;
-    margin-bottom: 4px;
-  }
-  .stat-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: var(--text3);
-  }
-
-  /* ===== TOAST ===== */
-  #toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 24px;
-    font-size: 14px;
-    color: var(--text);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    z-index: 999;
-    white-space: nowrap;
-  }
-  #toast.show { transform: translateX(-50%) translateY(0); }
-
-  /* ===== LOADING ===== */
-  .loading {
-    text-align: center;
-    padding: 40px;
-    color: var(--text3);
-    font-size: 14px;
-  }
-  .spinner {
-    display: inline-block;
-    width: 20px; height: 20px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    margin-right: 8px;
-    vertical-align: middle;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ===== PROJECT MGMT ===== */
-  .project-list { display: grid; gap: 12px; }
-  .project-item {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .project-item .pcode {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--accent);
-    background: rgba(245,166,35,0.1);
-    border-radius: 6px;
-    padding: 4px 8px;
-    flex-shrink: 0;
-  }
-  .project-item .pinfo { flex: 1; }
-  .project-item .pname { font-weight: 600; font-size: 14px; color: var(--text); }
-  .project-item .paddr { font-size: 12px; color: var(--text3); margin-top: 2px; }
-  .project-item .pradius {
-    font-size: 12px;
-    color: var(--text3);
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 48px 20px;
-    color: var(--text3);
-    font-size: 14px;
-  }
-  .empty-icon { font-size: 40px; margin-bottom: 12px; }
-
-  /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  /* TOAST */
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 24px;font-size:14px;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,.5);transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap}
+  #toast.show{transform:translateX(-50%) translateY(0)}
+  .loading{text-align:center;padding:40px;color:var(--text3);font-size:14px}
+  .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .empty-state{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px}
+  .empty-icon{font-size:36px;margin-bottom:12px}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 </style>
 </head>
 <body>
@@ -617,6 +164,14 @@
       </div>
       <div class="logo-sub">Hệ thống chấm công công trường</div>
     </div>
+
+    <button class="btn-google" onclick="loginGoogle()">
+      <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Đăng nhập bằng Google
+    </button>
+
+    <div class="divider">hoặc</div>
+
     <div class="field-group">
       <label>Email</label>
       <input type="email" id="loginEmail" placeholder="email@vela.vn" autocomplete="email">
@@ -626,7 +181,7 @@
       <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
     </div>
     <button class="btn-primary" onclick="doLogin()">Đăng nhập</button>
-    <div id="loginMsg" style="text-align:center;font-size:13px;color:var(--red);margin-top:16px;"></div>
+    <div id="loginMsg" style="text-align:center;font-size:13px;color:var(--red);margin-top:14px"></div>
   </div>
 </div>
 
@@ -646,50 +201,41 @@
     </div>
   </div>
 
-  <div class="nav-tabs" id="navTabs">
-    <button class="nav-tab active" onclick="switchTab('checkin')">⏱ Chấm Công</button>
-    <button class="nav-tab" onclick="switchTab('mytable')">📋 Bảng Công Tôi</button>
-    <button class="nav-tab admin-only" onclick="switchTab('teamtable')" style="display:none">👥 Bảng Công Nhóm</button>
-    <button class="nav-tab admin-only" onclick="switchTab('adjust')" style="display:none">✏️ Điều Chỉnh</button>
-    <button class="nav-tab admin-only" onclick="switchTab('projects')" style="display:none">🗂 Dự Án</button>
-    <button class="nav-tab admin-only" onclick="switchTab('hrprofile')" style="display:none">👤 Nhân Sự</button>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-tab="checkin" onclick="switchTab(this,'checkin')">⏱ Chấm Công</button>
+    <button class="nav-tab" data-tab="mytable" onclick="switchTab(this,'mytable')">📋 Bảng Công Tôi</button>
+    <button class="nav-tab admin-only" data-tab="teamtable" onclick="switchTab(this,'teamtable')" style="display:none">👥 Bảng Công Nhóm</button>
+    <button class="nav-tab admin-only" data-tab="projects" onclick="switchTab(this,'projects')" style="display:none">🗂 Dự Án</button>
+    <button class="nav-tab admin-only" data-tab="hrprofile" onclick="switchTab(this,'hrprofile')" style="display:none">👤 Nhân Sự</button>
   </div>
 
   <div class="content">
 
-    <!-- TAB: CHECKIN -->
+    <!-- CHECKIN -->
     <div class="tab-pane active" id="tab-checkin">
       <div class="card">
         <div class="checkin-hero">
           <div class="date-display" id="dateDisplay">--/--/----</div>
           <div class="time-display" id="timeDisplay">--:--:--</div>
           <div class="day-display" id="dayDisplay">---</div>
-
           <div class="project-selector">
             <span>🏗️</span>
-            <select id="projectSelect">
-              <option value="">-- Chọn dự án --</option>
-            </select>
+            <select id="projectSelect"><option value="">-- Chọn dự án --</option></select>
           </div>
-
           <div class="location-status" id="locationStatus">
             <div class="loc-dot idle" id="locDot"></div>
             <span id="locText">Chưa lấy vị trí</span>
           </div>
-
           <button class="btn-checkin" id="checkinBtn" onclick="doCheckin()">
             <div class="btn-icon">✅</div>
             <div class="btn-label">CHẤM CÔNG</div>
           </button>
-
-          <div class="checkin-result" id="checkinResult">
-            Chọn dự án và nhấn nút để chấm công
-          </div>
+          <div class="checkin-result" id="checkinResult">Chọn dự án và nhấn nút để chấm công</div>
         </div>
       </div>
     </div>
 
-    <!-- TAB: MY TABLE -->
+    <!-- MY TABLE -->
     <div class="tab-pane" id="tab-mytable">
       <div class="card">
         <div class="card-title">Bảng công của tôi</div>
@@ -697,231 +243,115 @@
           <select id="myMonth"></select>
           <select id="myYear"></select>
           <button class="btn-load" onclick="loadMyAttendance()">Xem</button>
+          <button class="btn-export" onclick="exportMyExcel()">⬇ Excel</button>
         </div>
         <div class="stats-grid" id="myStats"></div>
-        <div class="att-table-wrap">
-          <div id="myTableContent" class="empty-state">
-            <div class="empty-icon">📋</div>
-            Chọn tháng và nhấn Xem
-          </div>
+        <div class="att-table-wrap" id="myTableContent">
+          <div class="empty-state"><div class="empty-icon">📋</div>Chọn tháng và nhấn Xem</div>
         </div>
       </div>
     </div>
 
-    <!-- TAB: TEAM TABLE (admin) -->
+    <!-- TEAM TABLE -->
     <div class="tab-pane" id="tab-teamtable">
       <div class="card">
         <div class="card-title">Bảng công nhóm</div>
         <div class="month-nav">
-          <select id="teamProject">
-            <option value="">-- Tất cả dự án --</option>
-          </select>
+          <select id="teamProject"><option value="">-- Tất cả dự án --</option></select>
           <select id="teamMonth"></select>
           <select id="teamYear"></select>
           <button class="btn-load" onclick="loadTeamAttendance()">Xem</button>
+          <button class="btn-export" onclick="exportTeamExcel()">⬇ Excel</button>
         </div>
         <div id="teamTableContent" class="empty-state">
-          <div class="empty-icon">👥</div>
-          Chọn tháng và nhấn Xem
+          <div class="empty-icon">👥</div>Chọn tháng và nhấn Xem
         </div>
       </div>
     </div>
 
-    <!-- TAB: ADJUST (admin) -->
-    <div class="tab-pane" id="tab-adjust">
-      <div class="card">
-        <div class="card-title">Điều chỉnh công</div>
-        <div class="admin-form">
-          <div class="form-row">
-            <div class="field-group">
-              <label>Nhân viên</label>
-              <select id="adjUser">
-                <option value="">-- Chọn nhân viên --</option>
-              </select>
-            </div>
-            <div class="field-group">
-              <label>Ngày cần điều chỉnh</label>
-              <input type="date" id="adjDate">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="field-group">
-              <label>Dự án</label>
-              <select id="adjProject">
-                <option value="">-- Chọn dự án --</option>
-              </select>
-            </div>
-            <div class="field-group">
-              <label>Trạng thái</label>
-              <select id="adjStatus">
-                <option value="present">✅ Có mặt</option>
-                <option value="absent">❌ Vắng</option>
-                <option value="leave">🏖️ Nghỉ phép</option>
-                <option value="holiday">🎌 Nghỉ lễ</option>
-              </select>
-            </div>
-          </div>
-          <div class="field-group">
-            <label>Lý do điều chỉnh</label>
-            <textarea id="adjReason" placeholder="Ghi rõ lý do..."></textarea>
-          </div>
-          <div style="display:flex;gap:12px">
-            <button class="btn-primary" style="flex:1" onclick="doAdjust()">Lưu điều chỉnh</button>
-            <button class="btn-secondary" onclick="clearAdjust()">Xóa form</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Lịch sử điều chỉnh gần đây</div>
-        <div id="adjHistory" class="empty-state">
-          <div class="empty-icon">📝</div>
-          Chưa có điều chỉnh nào
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB: PROJECTS (admin) -->
+    <!-- PROJECTS -->
     <div class="tab-pane" id="tab-projects">
       <div class="card">
-        <div class="card-title">Thêm dự án mới</div>
+        <div class="card-title" id="projectFormTitle">Thêm dự án mới</div>
         <div class="admin-form">
+          <input type="hidden" id="editProjectId">
           <div class="form-row">
-            <div class="field-group">
-              <label>Mã dự án</label>
-              <input type="text" id="pjCode" placeholder="VG-B13">
-            </div>
-            <div class="field-group">
-              <label>Tên dự án</label>
-              <input type="text" id="pjName" placeholder="Sycamore B13">
-            </div>
+            <div class="field-group"><label>Mã dự án</label><input type="text" id="pjCode" placeholder="VG-B13"></div>
+            <div class="field-group"><label>Tên dự án</label><input type="text" id="pjName" placeholder="Sycamore B13"></div>
           </div>
-          <div class="field-group">
-            <label>Địa chỉ</label>
-            <input type="text" id="pjAddr" placeholder="Quy Nhơn, Bình Định">
-          </div>
+          <div class="field-group"><label>Địa chỉ</label><input type="text" id="pjAddr" placeholder="Quy Nhơn, Bình Định"></div>
           <div class="form-row">
-            <div class="field-group">
-              <label>Vĩ độ (Latitude)</label>
-              <input type="number" id="pjLat" placeholder="13.7760" step="any">
-            </div>
-            <div class="field-group">
-              <label>Kinh độ (Longitude)</label>
-              <input type="number" id="pjLng" placeholder="109.2241" step="any">
-            </div>
+            <div class="field-group"><label>Vĩ độ (Latitude)</label><input type="number" id="pjLat" placeholder="13.7760" step="any"></div>
+            <div class="field-group"><label>Kinh độ (Longitude)</label><input type="number" id="pjLng" placeholder="109.2241" step="any"></div>
           </div>
-          <div class="field-group">
-            <label>Bán kính chấm công (mét)</label>
-            <input type="number" id="pjRadius" value="250" min="50" max="1000">
-          </div>
-          <div style="display:flex;gap:12px;align-items:center">
-            <button class="btn-primary" style="flex:1" onclick="addProject()">Thêm dự án</button>
-            <button class="btn-secondary" onclick="getCurrentLocation()">📍 Lấy vị trí hiện tại</button>
+          <div class="field-group"><label>Bán kính chấm công (mét)</label><input type="number" id="pjRadius" value="250" min="50" max="1000"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn-primary" style="flex:1;min-width:140px" onclick="saveProject()">Lưu dự án</button>
+            <button class="btn-secondary" onclick="getCurrentLocation()">📍 Vị trí hiện tại</button>
+            <button class="btn-secondary" onclick="cancelEditProject()" id="btnCancelEdit" style="display:none">Hủy</button>
           </div>
         </div>
       </div>
-
       <div class="card">
         <div class="card-title">Danh sách dự án</div>
         <div id="projectList" class="loading"><span class="spinner"></span> Đang tải...</div>
       </div>
     </div>
 
-    <!-- TAB: HR PROFILE (admin) -->
+    <!-- HR -->
     <div class="tab-pane" id="tab-hrprofile">
       <div class="card">
         <div class="card-title">Thêm nhân sự mới</div>
         <div class="admin-form">
           <div class="form-row">
-            <div class="field-group">
-              <label>Họ tên</label>
-              <input type="text" id="hrName" placeholder="Nguyễn Văn A">
-            </div>
-            <div class="field-group">
-              <label>Mã nhân viên</label>
-              <input type="text" id="hrCode" placeholder="VL-001">
-            </div>
+            <div class="field-group"><label>Họ tên</label><input type="text" id="hrName" placeholder="Nguyễn Văn A"></div>
+            <div class="field-group"><label>Mã nhân viên</label><input type="text" id="hrCode" placeholder="VL-001"></div>
           </div>
           <div class="form-row">
-            <div class="field-group">
-              <label>Email (dùng để đăng nhập)</label>
-              <input type="email" id="hrEmail" placeholder="nva@vela.vn">
-            </div>
-            <div class="field-group">
-              <label>Số điện thoại</label>
-              <input type="text" id="hrPhone" placeholder="0901234567">
-            </div>
+            <div class="field-group"><label>Email (dùng để đăng nhập Google)</label><input type="email" id="hrEmail" placeholder="nva@gmail.com"></div>
+            <div class="field-group"><label>Số điện thoại</label><input type="text" id="hrPhone" placeholder="0901234567"></div>
           </div>
           <div class="form-row">
-            <div class="field-group">
-              <label>Chức vụ</label>
-              <input type="text" id="hrPosition" placeholder="Kỹ sư công trường">
-            </div>
-            <div class="field-group">
-              <label>Phân quyền</label>
+            <div class="field-group"><label>Chức vụ</label><input type="text" id="hrPosition" placeholder="Kỹ sư công trường"></div>
+            <div class="field-group"><label>Phân quyền</label>
               <select id="hrRole">
-                <option value="employee">Nhân viên</option>
-                <option value="site_admin">Admin công trình</option>
-                <option value="superadmin">Super Admin</option>
+                <option value="employee">👷 Nhân viên</option>
+                <option value="site_admin">🛡 Admin công trình</option>
+                <option value="superadmin">🔑 Super Admin</option>
               </select>
             </div>
           </div>
           <div class="form-row">
-            <div class="field-group">
-              <label>Dự án</label>
-              <select id="hrProject">
-                <option value="">-- Chọn dự án --</option>
-              </select>
-            </div>
-            <div class="field-group">
-              <label>Ngày vào làm</label>
-              <input type="date" id="hrJoinDate">
-            </div>
+            <div class="field-group"><label>Dự án</label><select id="hrProject"><option value="">-- Chọn dự án --</option></select></div>
+            <div class="field-group"><label>Ngày vào làm</label><input type="date" id="hrJoinDate"></div>
           </div>
           <button class="btn-primary" onclick="addUser()">Thêm nhân sự</button>
         </div>
       </div>
-
       <div class="card">
         <div class="card-title">Danh sách nhân sự</div>
         <div id="userList" class="loading"><span class="spinner"></span> Đang tải...</div>
       </div>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /mainApp -->
+  </div>
+</div>
 
+<!-- EDIT PROJECT MODAL (inline handled) -->
 <div id="toast"></div>
 
 <script>
-// =============================================
-// CONFIG
-// =============================================
 const SUPABASE_URL = 'https://ynffvkuwdrfqlmpemhes.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_TPB6sZUqz5z6549RU8hKhQ_F83ref0J';
-
-const API = (path) => `${SUPABASE_URL}/rest/v1/${path}`;
-const AUTH = (path) => `${SUPABASE_URL}/auth/v1/${path}`;
+const GOOGLE_CLIENT_ID = '775858800222-r25d91n7qa5454aqhb2ni6q77kds2hns.apps.googleusercontent.com';
+const APP_URL = 'https://letrananhtoancts.github.io/VELA_CHAMCONG/';
 
 const DAYS = ['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
-const MONTHS_VI = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
-                   'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+const MONTHS_VI = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
 
-// =============================================
-// STATE
-// =============================================
-let state = {
-  session: null,
-  currentUser: null,
-  projects: [],
-  users: [],
-  currentLocation: null,
-  checkedInToday: false
-};
+let state = { session: null, currentUser: null, projects: [], users: [], checkedInToday: false, lastAttData: null, lastTeamData: null };
 
-// =============================================
-// SUPABASE HELPERS
-// =============================================
+// ── SUPABASE HELPERS ──
 async function sbFetch(path, options = {}) {
   const headers = {
     'apikey': SUPABASE_KEY,
@@ -929,136 +359,104 @@ async function sbFetch(path, options = {}) {
     'Prefer': 'return=representation',
     ...options.headers
   };
-  if (state.session?.access_token) {
-    headers['Authorization'] = `Bearer ${state.session.access_token}`;
-  } else {
-    headers['Authorization'] = `Bearer ${SUPABASE_KEY}`;
-  }
-  const res = await fetch(API(path), { ...options, headers });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `HTTP ${res.status}`);
-  }
-  const text = await res.text();
-  return text ? JSON.parse(text) : [];
+  headers['Authorization'] = state.session?.access_token ? `Bearer ${state.session.access_token}` : `Bearer ${SUPABASE_KEY}`;
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { ...options, headers });
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.message || `HTTP ${res.status}`); }
+  const t = await res.text(); return t ? JSON.parse(t) : [];
 }
 
 async function sbAuth(path, body) {
-  const res = await fetch(AUTH(path), {
-    method: 'POST',
-    headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/${path}`, {
+    method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error_description || data.msg || 'Auth error');
-  return data;
+  const d = await res.json();
+  if (!res.ok) throw new Error(d.error_description || d.msg || 'Auth error');
+  return d;
 }
 
-// =============================================
-// AUTH
-// =============================================
+// ── AUTH ──
+function loginGoogle() {
+  const redirectTo = encodeURIComponent(APP_URL);
+  window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectTo}`;
+}
+
 async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const pass = document.getElementById('loginPass').value;
   const msg = document.getElementById('loginMsg');
   const btn = document.querySelector('#loginScreen .btn-primary');
-
   if (!email || !pass) { msg.textContent = 'Vui lòng nhập đầy đủ thông tin'; return; }
-
-  btn.disabled = true;
-  btn.textContent = 'Đang đăng nhập...';
-  msg.textContent = '';
-
+  btn.disabled = true; btn.textContent = 'Đang đăng nhập...'; msg.textContent = '';
   try {
     const data = await sbAuth('token?grant_type=password', { email, password: pass });
     state.session = data;
     localStorage.setItem('vela_session', JSON.stringify(data));
     await initApp();
-  } catch (e) {
-    msg.textContent = 'Sai email hoặc mật khẩu';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Đăng nhập';
-  }
+  } catch(e) { msg.textContent = 'Sai email hoặc mật khẩu'; }
+  finally { btn.disabled = false; btn.textContent = 'Đăng nhập'; }
 }
 
-// Enter key login
-document.getElementById('loginPass').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
-});
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 
 async function doLogout() {
   localStorage.removeItem('vela_session');
-  state = { session: null, currentUser: null, projects: [], users: [], currentLocation: null, checkedInToday: false };
+  state = { session:null, currentUser:null, projects:[], users:[], checkedInToday:false, lastAttData:null, lastTeamData:null };
   document.getElementById('mainApp').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
 }
 
 async function initApp() {
   try {
-    // Get current user from users table by email
     const email = state.session.user?.email;
     const users = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&limit=1`);
-    if (!users.length) throw new Error('Không tìm thấy tài khoản');
-    state.currentUser = users[0];
-
+    if (!users.length) {
+      // Auto-create employee record for Google OAuth users
+      const created = await sbFetch('users', { method:'POST', body: JSON.stringify({
+        full_name: state.session.user?.user_metadata?.full_name || email.split('@')[0],
+        email, role:'employee', is_active:true
+      })});
+      state.currentUser = created[0];
+    } else {
+      state.currentUser = users[0];
+    }
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
-
-    // Set user info
     const name = state.currentUser.full_name;
     document.getElementById('userName').textContent = name;
     document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-
-    // Show admin tabs
     if (['superadmin','site_admin'].includes(state.currentUser.role)) {
       document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
     }
-
-    // Load data
     await loadProjects();
     await loadUsers();
     startClock();
     await checkTodayAttendance();
     populateMonthSelectors();
-    loadAdjHistory();
-
-  } catch (e) {
-    showToast('❌ ' + e.message);
-    doLogout();
-  }
+  } catch(e) { showToast('❌ '+e.message); doLogout(); }
 }
 
-// =============================================
-// PROJECTS
-// =============================================
+// ── PROJECTS ──
 async function loadProjects() {
   try {
     let url = 'projects?is_active=eq.true&order=name';
-    if (state.currentUser.role === 'site_admin' && state.currentUser.project_id) {
+    if (state.currentUser.role === 'site_admin' && state.currentUser.project_id)
       url = `projects?id=eq.${state.currentUser.project_id}`;
-    }
     state.projects = await sbFetch(url);
     populateProjectSelects();
     renderProjectList();
-  } catch (e) { console.error(e); }
+  } catch(e) { console.error(e); }
 }
 
 function populateProjectSelects() {
-  const selects = ['projectSelect','teamProject','adjProject','hrProject'];
-  selects.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
+  ['projectSelect','teamProject','hrProject'].forEach(id => {
+    const el = document.getElementById(id); if (!el) return;
     const val = el.value;
     const isTeam = id === 'teamProject';
     el.innerHTML = isTeam ? '<option value="">-- Tất cả dự án --</option>' : '<option value="">-- Chọn dự án --</option>';
-    state.projects.forEach(p => {
-      el.innerHTML += `<option value="${p.id}">${p.code} — ${p.name}</option>`;
-    });
+    state.projects.forEach(p => el.innerHTML += `<option value="${p.id}">${p.code} — ${p.name}</option>`);
     el.value = val;
   });
-
-  // Default: assign user's project
   if (state.currentUser.project_id) {
     const ps = document.getElementById('projectSelect');
     if (ps) ps.value = state.currentUser.project_id;
@@ -1066,46 +464,72 @@ function populateProjectSelects() {
 }
 
 function renderProjectList() {
-  const el = document.getElementById('projectList');
-  if (!el) return;
-  if (!state.projects.length) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🗂</div>Chưa có dự án nào</div>';
-    return;
-  }
+  const el = document.getElementById('projectList'); if (!el) return;
+  if (!state.projects.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">🗂</div>Chưa có dự án nào</div>'; return; }
   el.innerHTML = `<div class="project-list">${state.projects.map(p => `
     <div class="project-item">
       <div class="pcode">${p.code}</div>
       <div class="pinfo">
         <div class="pname">${p.name}</div>
-        <div class="paddr">📍 ${p.address || 'Chưa có địa chỉ'} &nbsp;|&nbsp; ${p.lat?.toFixed(4)}, ${p.lng?.toFixed(4)}</div>
+        <div class="paddr">📍 ${p.address||'—'} &nbsp;|&nbsp; ${p.lat?.toFixed(4)}, ${p.lng?.toFixed(4)}</div>
       </div>
-      <div class="pradius">R: ${p.radius_m}m</div>
-    </div>
-  `).join('')}</div>`;
+      <div class="pradius">R:${p.radius_m}m</div>
+      <button class="btn-edit-sm" onclick="editProject('${p.id}')">✏️</button>
+      <button class="btn-icon-sm" onclick="deleteProject('${p.id}','${p.name}')">🗑</button>
+    </div>`).join('')}</div>`;
 }
 
-async function addProject() {
+async function saveProject() {
+  const editId = document.getElementById('editProjectId').value;
   const code = document.getElementById('pjCode').value.trim();
   const name = document.getElementById('pjName').value.trim();
   const addr = document.getElementById('pjAddr').value.trim();
   const lat = parseFloat(document.getElementById('pjLat').value);
   const lng = parseFloat(document.getElementById('pjLng').value);
   const radius = parseInt(document.getElementById('pjRadius').value) || 250;
-
-  if (!code || !name || isNaN(lat) || isNaN(lng)) {
-    showToast('⚠️ Điền đầy đủ mã, tên, tọa độ'); return;
-  }
-
+  if (!code||!name||isNaN(lat)||isNaN(lng)) { showToast('⚠️ Điền đầy đủ mã, tên, tọa độ'); return; }
   try {
-    await sbFetch('projects', {
-      method: 'POST',
-      body: JSON.stringify({ code, name, address: addr, lat, lng, radius_m: radius })
-    });
-    showToast('✅ Đã thêm dự án ' + name);
-    ['pjCode','pjName','pjAddr','pjLat','pjLng'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('pjRadius').value = 250;
+    if (editId) {
+      await sbFetch(`projects?id=eq.${editId}`, { method:'PATCH', body: JSON.stringify({code,name,address:addr,lat,lng,radius_m:radius}) });
+      showToast('✅ Đã cập nhật dự án '+name);
+    } else {
+      await sbFetch('projects', { method:'POST', body: JSON.stringify({code,name,address:addr,lat,lng,radius_m:radius}) });
+      showToast('✅ Đã thêm dự án '+name);
+    }
+    cancelEditProject();
     await loadProjects();
-  } catch (e) { showToast('❌ ' + e.message); }
+  } catch(e) { showToast('❌ '+e.message); }
+}
+
+function editProject(id) {
+  const p = state.projects.find(x => x.id === id); if (!p) return;
+  document.getElementById('editProjectId').value = p.id;
+  document.getElementById('pjCode').value = p.code;
+  document.getElementById('pjName').value = p.name;
+  document.getElementById('pjAddr').value = p.address || '';
+  document.getElementById('pjLat').value = p.lat;
+  document.getElementById('pjLng').value = p.lng;
+  document.getElementById('pjRadius').value = p.radius_m;
+  document.getElementById('projectFormTitle').textContent = 'Chỉnh sửa dự án';
+  document.getElementById('btnCancelEdit').style.display = 'inline-block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function cancelEditProject() {
+  document.getElementById('editProjectId').value = '';
+  ['pjCode','pjName','pjAddr','pjLat','pjLng'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pjRadius').value = 250;
+  document.getElementById('projectFormTitle').textContent = 'Thêm dự án mới';
+  document.getElementById('btnCancelEdit').style.display = 'none';
+}
+
+async function deleteProject(id, name) {
+  if (!confirm(`Xóa dự án "${name}"?`)) return;
+  try {
+    await sbFetch(`projects?id=eq.${id}`, { method:'PATCH', body: JSON.stringify({is_active:false}) });
+    showToast('✅ Đã xóa dự án '+name);
+    await loadProjects();
+  } catch(e) { showToast('❌ '+e.message); }
 }
 
 function getCurrentLocation() {
@@ -1117,50 +541,33 @@ function getCurrentLocation() {
   }, () => showToast('❌ Không lấy được vị trí'));
 }
 
-// =============================================
-// USERS
-// =============================================
+// ── USERS ──
 async function loadUsers() {
   try {
     let url = 'users?is_active=eq.true&order=full_name';
-    if (state.currentUser.role === 'site_admin' && state.currentUser.project_id) {
+    if (state.currentUser.role==='site_admin' && state.currentUser.project_id)
       url += `&project_id=eq.${state.currentUser.project_id}`;
-    }
     state.users = await sbFetch(url);
     renderUserList();
-    populateUserSelect();
-  } catch (e) { console.error(e); }
-}
-
-function populateUserSelect() {
-  const el = document.getElementById('adjUser');
-  if (!el) return;
-  el.innerHTML = '<option value="">-- Chọn nhân viên --</option>';
-  state.users.forEach(u => {
-    el.innerHTML += `<option value="${u.id}">${u.full_name} (${u.employee_code || u.email})</option>`;
-  });
+  } catch(e) { console.error(e); }
 }
 
 function renderUserList() {
-  const el = document.getElementById('userList');
-  if (!el) return;
-  if (!state.users.length) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div>Chưa có nhân sự nào</div>';
-    return;
-  }
+  const el = document.getElementById('userList'); if (!el) return;
+  if (!state.users.length) { el.innerHTML='<div class="empty-state"><div class="empty-icon">👤</div>Chưa có nhân sự nào</div>'; return; }
+  const roleMap = {superadmin:'🔑 Super Admin',site_admin:'🛡 Admin CT',employee:'👷 Nhân viên'};
   el.innerHTML = `<div class="att-table-wrap"><table>
-    <thead><tr>
-      <th>Mã NV</th><th>Họ tên</th><th>Chức vụ</th><th>Dự án</th><th>Phân quyền</th>
-    </tr></thead>
+    <thead><tr><th>Mã NV</th><th>Họ tên</th><th>Email</th><th>Chức vụ</th><th>Dự án</th><th>Quyền</th><th></th></tr></thead>
     <tbody>${state.users.map(u => {
-      const proj = state.projects.find(p => p.id === u.project_id);
-      const roleMap = { superadmin: '🔑 Super Admin', site_admin: '🛡 Admin CT', employee: '👷 Nhân viên' };
+      const proj = state.projects.find(p=>p.id===u.project_id);
       return `<tr>
-        <td><span style="font-family:monospace;color:var(--accent)">${u.employee_code || '—'}</span></td>
+        <td style="font-family:monospace;color:var(--accent)">${u.employee_code||'—'}</td>
         <td style="color:var(--text);font-weight:500">${u.full_name}</td>
-        <td>${u.position || '—'}</td>
-        <td>${proj ? proj.code : '—'}</td>
-        <td><span class="badge badge-present">${roleMap[u.role] || u.role}</span></td>
+        <td style="font-size:12px">${u.email||'—'}</td>
+        <td>${u.position||'—'}</td>
+        <td>${proj?proj.code:'—'}</td>
+        <td><span class="badge badge-present">${roleMap[u.role]||u.role}</span></td>
+        <td><button class="btn-icon-sm" onclick="deactivateUser('${u.id}','${u.full_name}')">🗑</button></td>
       </tr>`;
     }).join('')}</tbody>
   </table></div>`;
@@ -1169,46 +576,45 @@ function renderUserList() {
 async function addUser() {
   const body = {
     full_name: document.getElementById('hrName').value.trim(),
-    employee_code: document.getElementById('hrCode').value.trim(),
+    employee_code: document.getElementById('hrCode').value.trim() || null,
     email: document.getElementById('hrEmail').value.trim(),
-    phone: document.getElementById('hrPhone').value.trim(),
-    position: document.getElementById('hrPosition').value.trim(),
+    phone: document.getElementById('hrPhone').value.trim() || null,
+    position: document.getElementById('hrPosition').value.trim() || null,
     role: document.getElementById('hrRole').value,
     project_id: document.getElementById('hrProject').value || null,
-    join_date: document.getElementById('hrJoinDate').value || null
+    join_date: document.getElementById('hrJoinDate').value || null,
+    is_active: true
   };
-
-  if (!body.full_name || !body.email) { showToast('⚠️ Cần có họ tên và email'); return; }
-
+  if (!body.full_name||!body.email) { showToast('⚠️ Cần có họ tên và email'); return; }
   try {
-    await sbFetch('users', { method: 'POST', body: JSON.stringify(body) });
-    showToast('✅ Đã thêm ' + body.full_name);
-    ['hrName','hrCode','hrEmail','hrPhone','hrPosition','hrJoinDate'].forEach(id => document.getElementById(id).value = '');
+    await sbFetch('users', { method:'POST', body: JSON.stringify(body) });
+    showToast('✅ Đã thêm '+body.full_name+' — họ đăng nhập bằng Gmail là tự động vào được');
+    ['hrName','hrCode','hrEmail','hrPhone','hrPosition','hrJoinDate'].forEach(id => document.getElementById(id).value='');
     await loadUsers();
-  } catch (e) { showToast('❌ ' + e.message); }
+  } catch(e) { showToast('❌ '+e.message); }
 }
 
-// =============================================
-// CLOCK
-// =============================================
+async function deactivateUser(id, name) {
+  if (!confirm(`Vô hiệu hóa nhân sự "${name}"?`)) return;
+  try {
+    await sbFetch(`users?id=eq.${id}`, { method:'PATCH', body: JSON.stringify({is_active:false}) });
+    showToast('✅ Đã vô hiệu hóa '+name);
+    await loadUsers();
+  } catch(e) { showToast('❌ '+e.message); }
+}
+
+// ── CLOCK ──
 function startClock() {
   function tick() {
     const now = new Date();
-    const h = String(now.getHours()).padStart(2,'0');
-    const m = String(now.getMinutes()).padStart(2,'0');
-    const s = String(now.getSeconds()).padStart(2,'0');
-    document.getElementById('timeDisplay').textContent = `${h}:${m}:${s}`;
-    document.getElementById('dateDisplay').textContent =
-      `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+    document.getElementById('timeDisplay').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+    document.getElementById('dateDisplay').textContent = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
     document.getElementById('dayDisplay').textContent = DAYS[now.getDay()];
   }
-  tick();
-  setInterval(tick, 1000);
+  tick(); setInterval(tick, 1000);
 }
 
-// =============================================
-// CHECK TODAY ATTENDANCE
-// =============================================
+// ── CHECK TODAY ──
 async function checkTodayAttendance() {
   const today = new Date().toISOString().split('T')[0];
   try {
@@ -1216,366 +622,274 @@ async function checkTodayAttendance() {
     if (rows.length) {
       state.checkedInToday = true;
       const t = new Date(rows[0].check_time);
-      document.getElementById('checkinResult').innerHTML =
-        `✅ Đã chấm công lúc <strong>${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}</strong>`;
+      document.getElementById('checkinResult').innerHTML = `✅ Đã chấm công lúc <strong>${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}</strong>`;
       const btn = document.getElementById('checkinBtn');
-      btn.classList.add('done');
-      btn.querySelector('.btn-label').textContent = 'ĐÃ CHẤM';
+      btn.classList.add('done'); btn.querySelector('.btn-label').textContent='ĐÃ CHẤM';
     }
-  } catch (e) { console.error(e); }
+  } catch(e) { console.error(e); }
 }
 
-// =============================================
-// GEOFENCING + CHECKIN
-// =============================================
-function calcDistance(lat1, lng1, lat2, lng2) {
-  const R = 6371000;
-  const dLat = (lat2-lat1) * Math.PI / 180;
-  const dLng = (lng2-lng1) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+// ── GEOFENCING ──
+function calcDistance(lat1,lng1,lat2,lng2) {
+  const R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
 async function doCheckin() {
   if (state.checkedInToday) { showToast('⚠️ Hôm nay đã chấm công rồi'); return; }
-
   const projectId = document.getElementById('projectSelect').value;
   if (!projectId) { showToast('⚠️ Chọn dự án trước'); return; }
-
-  const project = state.projects.find(p => p.id === projectId);
+  const project = state.projects.find(p=>p.id===projectId);
   if (!project) { showToast('❌ Không tìm thấy dự án'); return; }
-
   if (!navigator.geolocation) { showToast('⚠️ Trình duyệt không hỗ trợ GPS'); return; }
-
-  const btn = document.getElementById('checkinBtn');
-  const locDot = document.getElementById('locDot');
-  const locText = document.getElementById('locText');
-  const result = document.getElementById('checkinResult');
-
-  btn.disabled = true;
-  locDot.className = 'loc-dot checking';
-  locText.textContent = 'Đang lấy vị trí...';
-  result.textContent = '⏳ Đang xác định vị trí GPS...';
-
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      const { latitude, longitude, accuracy } = pos.coords;
-      const dist = Math.round(calcDistance(latitude, longitude, project.lat, project.lng));
-
-      locDot.className = dist <= project.radius_m ? 'loc-dot ok' : 'loc-dot fail';
-      locText.textContent = `Khoảng cách: ${dist}m (giới hạn: ${project.radius_m}m) | Độ chính xác: ±${Math.round(accuracy)}m`;
-
-      if (dist > project.radius_m) {
-        result.innerHTML = `❌ Ngoài phạm vi cho phép — cần trong vòng <strong>${project.radius_m}m</strong>, hiện tại cách <strong>${dist}m</strong>`;
-        btn.disabled = false;
-        return;
-      }
-
-      try {
-        const today = new Date().toISOString().split('T')[0];
-        await sbFetch('attendance', {
-          method: 'POST',
-          body: JSON.stringify({
-            user_id: state.currentUser.id,
-            project_id: projectId,
-            check_date: today,
-            check_time: new Date().toISOString(),
-            lat: latitude,
-            lng: longitude,
-            distance_m: dist,
-            status: 'present'
-          })
-        });
-
-        state.checkedInToday = true;
-        btn.classList.add('done');
-        btn.querySelector('.btn-label').textContent = 'ĐÃ CHẤM';
-        const now = new Date();
-        result.innerHTML = `✅ Chấm công thành công lúc <strong>${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</strong> — cách ${dist}m`;
-        showToast('✅ Chấm công thành công!');
-      } catch (e) {
-        result.innerHTML = e.message.includes('unique') ? '⚠️ Đã chấm công hôm nay rồi' : '❌ ' + e.message;
-        state.checkedInToday = true;
-      }
-      btn.disabled = false;
-    },
-    (err) => {
-      locDot.className = 'loc-dot fail';
-      locText.textContent = 'Không lấy được vị trí';
-      result.textContent = '❌ Không lấy được GPS. Kiểm tra quyền vị trí trên trình duyệt.';
-      btn.disabled = false;
-    },
-    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-  );
+  const btn=document.getElementById('checkinBtn');
+  const locDot=document.getElementById('locDot');
+  const locText=document.getElementById('locText');
+  const result=document.getElementById('checkinResult');
+  btn.disabled=true;
+  locDot.className='loc-dot checking'; locText.textContent='Đang lấy vị trí...';
+  result.textContent='⏳ Đang xác định vị trí GPS...';
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const {latitude,longitude,accuracy}=pos.coords;
+    const dist=Math.round(calcDistance(latitude,longitude,project.lat,project.lng));
+    locDot.className=dist<=project.radius_m?'loc-dot ok':'loc-dot fail';
+    locText.textContent=`Khoảng cách: ${dist}m (giới hạn: ${project.radius_m}m) | Độ chính xác: ±${Math.round(accuracy)}m`;
+    if (dist>project.radius_m) {
+      result.innerHTML=`❌ Ngoài phạm vi — cần trong <strong>${project.radius_m}m</strong>, hiện cách <strong>${dist}m</strong>`;
+      btn.disabled=false; return;
+    }
+    try {
+      const today=new Date().toISOString().split('T')[0];
+      await sbFetch('attendance',{method:'POST',body:JSON.stringify({
+        user_id:state.currentUser.id,project_id:projectId,check_date:today,
+        check_time:new Date().toISOString(),lat:latitude,lng:longitude,distance_m:dist,status:'present'
+      })});
+      state.checkedInToday=true;
+      btn.classList.add('done'); btn.querySelector('.btn-label').textContent='ĐÃ CHẤM';
+      const now=new Date();
+      result.innerHTML=`✅ Chấm công thành công lúc <strong>${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</strong> — cách ${dist}m`;
+      showToast('✅ Chấm công thành công!');
+    } catch(e) {
+      if (e.message.includes('unique')) { result.innerHTML='⚠️ Đã chấm công hôm nay rồi'; state.checkedInToday=true; }
+      else result.innerHTML='❌ '+e.message;
+    }
+    btn.disabled=false;
+  }, () => {
+    locDot.className='loc-dot fail'; locText.textContent='Không lấy được vị trí';
+    result.textContent='❌ Không lấy được GPS. Kiểm tra quyền vị trí trên trình duyệt.';
+    btn.disabled=false;
+  }, {enableHighAccuracy:true,timeout:15000,maximumAge:0});
 }
 
-// =============================================
-// MY ATTENDANCE TABLE
-// =============================================
+// ── MY ATTENDANCE ──
 function populateMonthSelectors() {
-  const now = new Date();
-  const ids = [['myMonth','myYear'],['teamMonth','teamYear']];
-  ids.forEach(([mId,yId]) => {
-    const mEl = document.getElementById(mId);
-    const yEl = document.getElementById(yId);
-    if (!mEl || !yEl) return;
-    mEl.innerHTML = MONTHS_VI.map((m,i) => `<option value="${i+1}" ${i+1===now.getMonth()+1?'selected':''}>${m}</option>`).join('');
-    for (let y = now.getFullYear(); y >= now.getFullYear()-2; y--) {
-      yEl.innerHTML += `<option value="${y}" ${y===now.getFullYear()?'selected':''}>${y}</option>`;
-    }
+  const now=new Date();
+  [['myMonth','myYear'],['teamMonth','teamYear']].forEach(([mId,yId]) => {
+    const mEl=document.getElementById(mId), yEl=document.getElementById(yId);
+    if(!mEl||!yEl) return;
+    mEl.innerHTML=MONTHS_VI.map((m,i)=>`<option value="${i+1}" ${i+1===now.getMonth()+1?'selected':''}>${m}</option>`).join('');
+    yEl.innerHTML='';
+    for(let y=now.getFullYear();y>=now.getFullYear()-2;y--)
+      yEl.innerHTML+=`<option value="${y}" ${y===now.getFullYear()?'selected':''}>${y}</option>`;
   });
 }
 
 async function loadMyAttendance() {
-  const month = parseInt(document.getElementById('myMonth').value);
-  const year = parseInt(document.getElementById('myYear').value);
-  const el = document.getElementById('myTableContent');
-  el.innerHTML = '<div class="loading"><span class="spinner"></span> Đang tải...</div>';
-
-  const startDate = `${year}-${String(month).padStart(2,'0')}-01`;
-  const endDate = new Date(year, month, 0).toISOString().split('T')[0];
-
+  const month=parseInt(document.getElementById('myMonth').value);
+  const year=parseInt(document.getElementById('myYear').value);
+  const el=document.getElementById('myTableContent');
+  el.innerHTML='<div class="loading"><span class="spinner"></span> Đang tải...</div>';
+  const startDate=`${year}-${String(month).padStart(2,'0')}-01`;
+  const endDate=new Date(year,month,0).toISOString().split('T')[0];
   try {
-    const rows = await sbFetch(
-      `attendance?user_id=eq.${state.currentUser.id}&check_date=gte.${startDate}&check_date=lte.${endDate}&order=check_date`
-    );
-    renderAttTable(rows, el, 'myStats', month, year);
-  } catch (e) { el.innerHTML = '<div class="empty-state">❌ ' + e.message + '</div>'; }
+    const rows=await sbFetch(`attendance?user_id=eq.${state.currentUser.id}&check_date=gte.${startDate}&check_date=lte.${endDate}&order=check_date`);
+    state.lastAttData={rows,month,year,user:state.currentUser};
+    renderMyTable(rows,month,year);
+  } catch(e) { el.innerHTML='<div class="empty-state">❌ '+e.message+'</div>'; }
 }
 
-function renderAttTable(rows, el, statsId, month, year) {
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const byDate = {};
-  rows.forEach(r => byDate[r.check_date] = r);
-
-  let present = 0, absent = 0, leave = 0;
-  const statusMap = { present: ['badge-present','✅ Có mặt'], absent: ['badge-absent','❌ Vắng'], leave: ['badge-leave','🏖️ Nghỉ phép'], holiday: ['badge-leave','🎌 Nghỉ lễ'] };
-
-  let tableRows = '';
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dt = new Date(dateStr);
-    const dayName = DAYS[dt.getDay()];
-    const isWeekend = dt.getDay() === 0 || dt.getDay() === 6;
-    const r = byDate[dateStr];
-    let badgeClass = '', badgeLabel = '';
-    if (r) {
-      [badgeClass, badgeLabel] = statusMap[r.status] || ['','—'];
-      if (r.status === 'present') present++;
-      else if (r.status === 'absent') absent++;
-      else if (r.status === 'leave') leave++;
-    } else if (!isWeekend) {
-      badgeClass = 'badge-absent'; badgeLabel = '— Chưa có';
-    }
-    const checkTime = r ? new Date(r.check_time) : null;
-    tableRows += `<tr style="${isWeekend?'opacity:0.45':''}">
+function renderMyTable(rows,month,year) {
+  const daysInMonth=new Date(year,month,0).getDate();
+  const byDate={};
+  rows.forEach(r=>byDate[r.check_date]=r);
+  let present=0,absent=0,leave=0;
+  const statusMap={present:['badge-present','✅ Có mặt'],absent:['badge-absent','❌ Vắng'],leave:['badge-leave','🏖️ Nghỉ phép'],holiday:['badge-holiday','🎌 Nghỉ lễ']};
+  let tableRows='';
+  for(let d=1;d<=daysInMonth;d++) {
+    const dateStr=`${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dt=new Date(dateStr);
+    const isWe=dt.getDay()===0||dt.getDay()===6;
+    const r=byDate[dateStr];
+    let bClass='',bLabel='';
+    if(r){[bClass,bLabel]=statusMap[r.status]||['','—'];if(r.status==='present')present++;else if(r.status==='absent')absent++;else if(r.status==='leave')leave++;}
+    const ct=r?new Date(r.check_time):null;
+    const proj=state.projects.find(p=>p.id===r?.project_id);
+    tableRows+=`<tr style="${isWe?'opacity:.45':''}">
       <td style="font-family:monospace">${d}</td>
-      <td>${dayName}</td>
-      <td>${r ? `<span class="badge ${badgeClass}">${badgeLabel}</span>${r.is_adjusted?' <span style="font-size:10px;color:var(--accent)">✏️</span>':''}` : (isWeekend ? '<span style="color:var(--text3);font-size:12px">Cuối tuần</span>' : '<span class="badge badge-absent">— Chưa có</span>')}</td>
-      <td style="font-family:monospace;font-size:12px">${checkTime ? `${checkTime.getHours()}:${String(checkTime.getMinutes()).padStart(2,'0')}` : '—'}</td>
-      <td style="font-size:12px;color:var(--text3)">${r?.distance_m ? r.distance_m+'m' : '—'}</td>
+      <td>${DAYS[dt.getDay()]}</td>
+      <td>${r?`<span class="badge ${bClass}">${bLabel}</span>`:(isWe?'<span style="color:var(--text3);font-size:11px">Cuối tuần</span>':'<span class="badge badge-absent">— Chưa có</span>')}</td>
+      <td style="font-family:monospace;font-size:12px">${ct?`${ct.getHours()}:${String(ct.getMinutes()).padStart(2,'0')}`:'—'}</td>
+      <td style="font-size:12px;color:var(--text3)">${r?.distance_m?r.distance_m+'m':'—'}</td>
+      <td style="font-size:12px;color:var(--text3)">${proj?proj.code:'—'}</td>
     </tr>`;
   }
-
-  el.innerHTML = `<table>
-    <thead><tr><th>#</th><th>Thứ</th><th>Trạng thái</th><th>Giờ chấm</th><th>Khoảng cách</th></tr></thead>
-    <tbody>${tableRows}</tbody>
-  </table>`;
-
-  if (statsId) {
-    document.getElementById(statsId).innerHTML = `
-      <div class="stat-card"><div class="stat-value" style="color:var(--green)">${present}</div><div class="stat-label">Ngày công</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:var(--red)">${absent}</div><div class="stat-label">Vắng mặt</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:var(--blue)">${leave}</div><div class="stat-label">Nghỉ phép</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:var(--accent)">${daysInMonth - present - absent - leave}</div><div class="stat-label">Chưa có DL</div></div>
-    `;
-  }
+  document.getElementById('myStats').innerHTML=`
+    <div class="stat-card"><div class="stat-value" style="color:var(--green)">${present}</div><div class="stat-label">Ngày công</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--red)">${absent}</div><div class="stat-label">Vắng mặt</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--blue)">${leave}</div><div class="stat-label">Nghỉ phép</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--accent)">${daysInMonth-present-absent-leave}</div><div class="stat-label">Chưa có DL</div></div>`;
+  document.getElementById('myTableContent').innerHTML=`<table>
+    <thead><tr><th>#</th><th>Thứ</th><th>Trạng thái</th><th>Giờ chấm</th><th>Khoảng cách</th><th>Dự án</th></tr></thead>
+    <tbody>${tableRows}</tbody></table>`;
 }
 
-// =============================================
-// TEAM ATTENDANCE (admin)
-// =============================================
+// ── TEAM ATTENDANCE ──
 async function loadTeamAttendance() {
-  const month = parseInt(document.getElementById('teamMonth').value);
-  const year = parseInt(document.getElementById('teamYear').value);
-  const projectId = document.getElementById('teamProject').value;
-  const el = document.getElementById('teamTableContent');
-  el.innerHTML = '<div class="loading"><span class="spinner"></span> Đang tải...</div>';
-
-  const startDate = `${year}-${String(month).padStart(2,'0')}-01`;
-  const endDate = new Date(year, month, 0).toISOString().split('T')[0];
-  const daysInMonth = new Date(year, month, 0).getDate();
-
+  const month=parseInt(document.getElementById('teamMonth').value);
+  const year=parseInt(document.getElementById('teamYear').value);
+  const projectId=document.getElementById('teamProject').value;
+  const el=document.getElementById('teamTableContent');
+  el.innerHTML='<div class="loading"><span class="spinner"></span> Đang tải...</div>';
+  const startDate=`${year}-${String(month).padStart(2,'0')}-01`;
+  const endDate=new Date(year,month,0).toISOString().split('T')[0];
+  const daysInMonth=new Date(year,month,0).getDate();
   try {
-    let userUrl = 'users?is_active=eq.true&order=full_name';
-    if (projectId) userUrl += `&project_id=eq.${projectId}`;
-    else if (state.currentUser.role === 'site_admin' && state.currentUser.project_id) {
-      userUrl += `&project_id=eq.${state.currentUser.project_id}`;
-    }
-
-    const [users, attRows] = await Promise.all([
-      sbFetch(userUrl),
-      sbFetch(`attendance?check_date=gte.${startDate}&check_date=lte.${endDate}${projectId?'&project_id=eq.'+projectId:''}`)
-    ]);
-
-    if (!users.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div>Không có nhân sự nào</div>'; return; }
-
-    // Group attendance by user
-    const attByUser = {};
-    attRows.forEach(r => {
-      if (!attByUser[r.user_id]) attByUser[r.user_id] = {};
-      attByUser[r.user_id][r.check_date] = r;
-    });
-
-    // Build header days
-    const dayHeaders = Array.from({length: daysInMonth}, (_,i) => {
-      const d = new Date(year, month-1, i+1);
-      const isWe = d.getDay()===0||d.getDay()===6;
-      return `<th style="${isWe?'color:var(--text3)':''}">${i+1}</th>`;
-    }).join('');
-
-    const tableRows = users.map(u => {
-      const att = attByUser[u.id] || {};
-      let total = 0;
-      const cells = Array.from({length: daysInMonth}, (_,i) => {
-        const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;
-        const dt = new Date(dateStr);
-        const isWe = dt.getDay()===0||dt.getDay()===6;
-        const r = att[dateStr];
-        if (r?.status === 'present' || r?.status === 'leave') total++;
-        const cell = r ? (r.status==='present'?'✅':r.status==='leave'?'🏖':'❌') : (isWe?'':'·');
-        return `<td style="text-align:center;font-size:12px;${isWe?'opacity:0.3':''}">${cell}</td>`;
-      }).join('');
-      return `<tr>
-        <td style="white-space:nowrap;font-weight:500;color:var(--text)">${u.full_name}</td>
-        <td style="text-align:center;font-family:monospace;color:var(--accent);font-weight:700">${total}</td>
-        ${cells}
-      </tr>`;
-    }).join('');
-
-    el.innerHTML = `<div style="overflow-x:auto"><table>
-      <thead><tr><th>Họ tên</th><th>Tổng</th>${dayHeaders}</tr></thead>
-      <tbody>${tableRows}</tbody>
-    </table></div>`;
-
-  } catch (e) { el.innerHTML = '<div class="empty-state">❌ ' + e.message + '</div>'; }
+    let userUrl='users?is_active=eq.true&order=full_name';
+    if(projectId) userUrl+=`&project_id=eq.${projectId}`;
+    else if(state.currentUser.role==='site_admin'&&state.currentUser.project_id)
+      userUrl+=`&project_id=eq.${state.currentUser.project_id}`;
+    let attUrl=`attendance?check_date=gte.${startDate}&check_date=lte.${endDate}`;
+    if(projectId) attUrl+=`&project_id=eq.${projectId}`;
+    const [users,attRows]=await Promise.all([sbFetch(userUrl),sbFetch(attUrl)]);
+    if(!users.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div>Không có nhân sự nào</div>';return;}
+    const attByUser={};
+    attRows.forEach(r=>{if(!attByUser[r.user_id])attByUser[r.user_id]={};attByUser[r.user_id][r.check_date]=r;});
+    state.lastTeamData={users,attByUser,month,year,daysInMonth,projectId};
+    renderTeamTable(users,attByUser,month,year,daysInMonth,el);
+  } catch(e){el.innerHTML='<div class="empty-state">❌ '+e.message+'</div>';}
 }
 
-// =============================================
-// ADJUST ATTENDANCE (admin)
-// =============================================
-async function doAdjust() {
-  const userId = document.getElementById('adjUser').value;
-  const date = document.getElementById('adjDate').value;
-  const projectId = document.getElementById('adjProject').value;
-  const status = document.getElementById('adjStatus').value;
-  const reason = document.getElementById('adjReason').value.trim();
+function renderTeamTable(users,attByUser,month,year,daysInMonth,el) {
+  const dayHeaders=Array.from({length:daysInMonth},(_,i)=>{
+    const d=new Date(year,month-1,i+1);
+    const isWe=d.getDay()===0||d.getDay()===6;
+    return `<th style="text-align:center;${isWe?'color:var(--text3)':''}">${i+1}</th>`;
+  }).join('');
+  const tableRows=users.map(u=>{
+    const att=attByUser[u.id]||{};
+    let total=0;
+    const cells=Array.from({length:daysInMonth},(_,i)=>{
+      const dateStr=`${year}-${String(month).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;
+      const dt=new Date(dateStr);
+      const isWe=dt.getDay()===0||dt.getDay()===6;
+      const r=att[dateStr];
+      if(r?.status==='present'||r?.status==='leave') total++;
+      const cell=r?(r.status==='present'?'✅':r.status==='leave'?'🏖':'❌'):(isWe?'':' ');
+      return `<td style="text-align:center;font-size:12px;${isWe?'opacity:.3':''}">${cell}</td>`;
+    }).join('');
+    return `<tr><td style="white-space:nowrap;font-weight:500;color:var(--text)">${u.full_name}</td><td style="text-align:center;font-family:monospace;color:var(--accent);font-weight:700">${total}</td>${cells}</tr>`;
+  }).join('');
+  el.innerHTML=`<div style="overflow-x:auto"><table>
+    <thead><tr><th>Họ tên</th><th style="text-align:center">Tổng</th>${dayHeaders}</tr></thead>
+    <tbody>${tableRows}</tbody></table></div>`;
+}
 
-  if (!userId || !date || !projectId || !reason) {
-    showToast('⚠️ Điền đầy đủ thông tin'); return;
+// ── EXPORT EXCEL ──
+function exportMyExcel() {
+  if(!state.lastAttData){showToast('⚠️ Xem bảng công trước');return;}
+  const {rows,month,year,user}=state.lastAttData;
+  const daysInMonth=new Date(year,month,0).getDate();
+  const byDate={};rows.forEach(r=>byDate[r.check_date]=r);
+  const statusLabel={present:'Có mặt',absent:'Vắng',leave:'Nghỉ phép',holiday:'Nghỉ lễ'};
+  const data=[['Ngày','Thứ','Trạng thái','Giờ chấm','Khoảng cách','Dự án']];
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr=`${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dt=new Date(dateStr);
+    const isWe=dt.getDay()===0||dt.getDay()===6;
+    const r=byDate[dateStr];
+    const ct=r?new Date(r.check_time):null;
+    const proj=state.projects.find(p=>p.id===r?.project_id);
+    data.push([d,DAYS[dt.getDay()],r?statusLabel[r.status]:(isWe?'Cuối tuần':''),ct?`${ct.getHours()}:${String(ct.getMinutes()).padStart(2,'0')}`:'',r?.distance_m?r.distance_m+'m':'',proj?proj.code:'']);
   }
-
-  try {
-    // Upsert attendance
-    const attData = {
-      user_id: userId,
-      project_id: projectId,
-      check_date: date,
-      check_time: new Date(date).toISOString(),
-      status,
-      is_adjusted: true,
-      note: reason
-    };
-
-    const existing = await sbFetch(`attendance?user_id=eq.${userId}&check_date=eq.${date}&limit=1`);
-    let attId;
-
-    if (existing.length) {
-      const old_status = existing[0].status;
-      await sbFetch(`attendance?id=eq.${existing[0].id}`, { method: 'PATCH', body: JSON.stringify({ status, is_adjusted: true, note: reason }) });
-      attId = existing[0].id;
-      // Log adjustment
-      await sbFetch('adjustments', { method: 'POST', body: JSON.stringify({
-        attendance_id: attId, user_id: userId, check_date: date,
-        old_status, new_status: status, reason, adjusted_by: state.currentUser.id
-      })});
-    } else {
-      const created = await sbFetch('attendance', { method: 'POST', body: JSON.stringify(attData) });
-      attId = created[0]?.id;
-      await sbFetch('adjustments', { method: 'POST', body: JSON.stringify({
-        attendance_id: attId, user_id: userId, check_date: date,
-        old_status: null, new_status: status, reason, adjusted_by: state.currentUser.id
-      })});
-    }
-
-    showToast('✅ Đã lưu điều chỉnh');
-    clearAdjust();
-    loadAdjHistory();
-  } catch (e) { showToast('❌ ' + e.message); }
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,`Tháng ${month}`);
+  XLSX.writeFile(wb,`ChamCong_${user.full_name.replace(/ /g,'_')}_T${month}_${year}.xlsx`);
 }
 
-function clearAdjust() {
-  ['adjUser','adjDate','adjProject','adjStatus'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('adjReason').value = '';
+function exportTeamExcel() {
+  if(!state.lastTeamData){showToast('⚠️ Xem bảng công nhóm trước');return;}
+  const {users,attByUser,month,year,daysInMonth}=state.lastTeamData;
+  const statusLabel={present:'✅',absent:'❌',leave:'🏖',holiday:'🎌'};
+  const dayHeaders=Array.from({length:daysInMonth},(_,i)=>i+1);
+  const header=['Họ tên','Tổng công',...dayHeaders.map(d=>`${d}/${month}`)];
+  const rows=users.map(u=>{
+    const att=attByUser[u.id]||{};
+    let total=0;
+    const cells=Array.from({length:daysInMonth},(_,i)=>{
+      const dateStr=`${year}-${String(month).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;
+      const r=att[dateStr];
+      if(r?.status==='present'||r?.status==='leave') total++;
+      return r?statusLabel[r.status]||'':'';
+    });
+    return [u.full_name,total,...cells];
+  });
+  const proj=state.projects.find(p=>p.id===state.lastTeamData.projectId);
+  const titleRow=[`BẢNG CHẤM CÔNG THÁNG ${month}/${year}${proj?' — '+proj.name:' — TẤT CẢ DỰ ÁN'}`];
+  const data=[titleRow,[],header,...rows];
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,`T${month}_${year}`);
+  XLSX.writeFile(wb,`BangCong_Nhom_T${month}_${year}${proj?'_'+proj.code:''}.xlsx`);
 }
 
-async function loadAdjHistory() {
-  const el = document.getElementById('adjHistory');
-  if (!el) return;
-  try {
-    const rows = await sbFetch('adjustments?order=adjusted_at.desc&limit=20');
-    if (!rows.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div>Chưa có điều chỉnh nào</div>'; return; }
-
-    const statusLabel = { present:'✅ Có mặt', absent:'❌ Vắng', leave:'🏖️ Nghỉ phép', holiday:'🎌 Nghỉ lễ' };
-    el.innerHTML = `<div class="att-table-wrap"><table>
-      <thead><tr><th>Ngày</th><th>Nhân viên</th><th>Trạng thái mới</th><th>Lý do</th><th>Thời gian</th></tr></thead>
-      <tbody>${rows.map(r => {
-        const adjTime = new Date(r.adjusted_at);
-        const u = state.users.find(u => u.id === r.user_id);
-        return `<tr>
-          <td style="font-family:monospace">${r.check_date}</td>
-          <td>${u?.full_name || '—'}</td>
-          <td><span class="badge badge-adjusted">${statusLabel[r.new_status] || r.new_status}</span></td>
-          <td style="color:var(--text2)">${r.reason}</td>
-          <td style="font-size:12px;color:var(--text3)">${adjTime.toLocaleDateString('vi-VN')} ${adjTime.getHours()}:${String(adjTime.getMinutes()).padStart(2,'0')}</td>
-        </tr>`;
-      }).join('')}</tbody>
-    </table></div>`;
-  } catch (e) { console.error(e); }
-}
-
-// =============================================
-// TAB NAVIGATION
-// =============================================
-function switchTab(id) {
-  document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+// ── TABS ──
+function switchTab(btn, id) {
+  document.querySelectorAll('.tab-pane').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el=>el.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
-  event.currentTarget.classList.add('active');
+  btn.classList.add('active');
 }
 
-// =============================================
-// TOAST
-// =============================================
+// ── TOAST ──
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-// =============================================
-// AUTO-LOGIN
-// =============================================
-(async () => {
-  const saved = localStorage.getItem('vela_session');
-  if (saved) {
+// ── AUTO LOGIN + GOOGLE CALLBACK ──
+(async()=>{
+  // Check Google OAuth callback (hash fragment)
+  const hash=window.location.hash;
+  if(hash.includes('access_token')) {
+    const params=new URLSearchParams(hash.substring(1));
+    const session={
+      access_token:params.get('access_token'),
+      refresh_token:params.get('refresh_token'),
+      user:{ email: null }
+    };
+    // Get user info
     try {
-      state.session = JSON.parse(saved);
+      const res=await fetch(`${SUPABASE_URL}/auth/v1/user`,{
+        headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+session.access_token}
+      });
+      const u=await res.json();
+      session.user=u;
+      state.session=session;
+      localStorage.setItem('vela_session',JSON.stringify(session));
+      window.history.replaceState(null,'',window.location.pathname);
+      await initApp(); return;
+    } catch(e){console.error(e);}
+  }
+  // Check saved session
+  const saved=localStorage.getItem('vela_session');
+  if(saved){
+    try{
+      state.session=JSON.parse(saved);
       await initApp();
-    } catch (e) {
-      localStorage.removeItem('vela_session');
-    }
+    }catch(e){localStorage.removeItem('vela_session');}
   }
 })();
 </script>
