@@ -223,19 +223,28 @@
           <div class="date-display" id="dateDisplay">--/--/----</div>
           <div class="time-display" id="timeDisplay">--:--:--</div>
           <div class="day-display" id="dayDisplay">---</div>
-          <div class="project-selector">
-            <span>🏗️</span>
-            <select id="projectSelect"><option value="">-- Chọn dự án --</option></select>
-          </div>
           <div class="location-status" id="locationStatus">
             <div class="loc-dot idle" id="locDot"></div>
             <span id="locText">Chưa lấy vị trí</span>
           </div>
+          <!-- Auto-detected project display -->
+          <div id="detectedProject" style="display:none;background:rgba(39,196,122,.08);border:1px solid rgba(39,196,122,.2);border-radius:12px;padding:12px 18px;margin-bottom:20px;font-size:14px;color:var(--green);text-align:center">
+            <span id="detectedProjectName"></span>
+          </div>
+          <!-- Manual fallback selector (roaming users / multiple matches) -->
+          <div id="manualProjectRow" style="display:none;margin-bottom:16px">
+            <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-align:center">⚠️ Phát hiện nhiều dự án — chọn dự án đang làm việc:</div>
+            <select id="projectSelect" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:inherit;font-size:14px;outline:none;margin-bottom:10px">
+              <option value="">-- Chọn dự án --</option>
+            </select>
+            <button onclick="confirmManualCheckin()" style="width:100%;background:var(--green);border:none;border-radius:10px;padding:12px;color:#fff;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">Xác nhận chấm công</button>
+          </div>
+          <input type="hidden" id="detectedProjectId">
           <button class="btn-checkin" id="checkinBtn" onclick="doCheckin()">
             <div class="btn-icon">✅</div>
             <div class="btn-label">CHẤM CÔNG</div>
           </button>
-          <div class="checkin-result" id="checkinResult">Chọn dự án và nhấn nút để chấm công</div>
+          <div class="checkin-result" id="checkinResult">Nhấn nút để tự động xác định vị trí và chấm công</div>
         </div>
       </div>
     </div>
@@ -507,28 +516,7 @@ function populateProjectSelects() {
     state.projects.forEach(p => el.innerHTML += `<option value="${p.id}">${p.code} — ${p.name}</option>`);
     el.value = val;
   });
-  // Filter checkin projects based on user scope
-  const scope = state.currentUser.project_scope || 'fixed';
-  const ps = document.getElementById('projectSelect');
-  if (ps) {
-    if (scope === 'fixed') {
-      // Show only assigned project
-      ps.innerHTML = '<option value="">-- Chọn dự án --</option>';
-      const myProj = state.projects.find(p=>p.id===state.currentUser.project_id);
-      if (myProj) {
-        ps.innerHTML += `<option value="${myProj.id}" selected>${myProj.code} — ${myProj.name}</option>`;
-      } else {
-        ps.innerHTML += '<option disabled>Chưa được gán dự án — liên hệ Admin</option>';
-      }
-    } else if (scope === 'multi') {
-      const allowed = state.currentUser.allowed_projects || [];
-      ps.innerHTML = '<option value="">-- Chọn dự án --</option>';
-      state.projects.filter(p=>allowed.includes(p.id)).forEach(p => {
-        ps.innerHTML += `<option value="${p.id}">${p.code} — ${p.name}</option>`;
-      });
-    }
-    // scope === 'all': already has all projects from populateProjectSelects
-  }
+  // Project scope applied automatically in getAccessibleProjects() during checkin
 }
 
 function renderProjectList() {
