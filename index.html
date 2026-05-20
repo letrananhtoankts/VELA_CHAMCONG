@@ -158,11 +158,10 @@
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">
-      <div class="logo-mark">
-        <div class="logo-icon">🏗️</div>
-        <span class="logo-text">Vela</span>
+      <div class="logo-mark" style="flex-direction:column;gap:6px">
+        <img src="https://raw.githubusercontent.com/VelaE-C/VELA_CHAMCONG/refs/heads/main/LOGO%20VELA.png" style="height:56px;object-fit:contain" alt="Vela E&C">
       </div>
-      <div class="logo-sub">Hệ thống chấm công công trường</div>
+      <div class="logo-sub" style="margin-top:8px">Hệ thống chấm công công trường</div>
     </div>
 
     <button class="btn-google" onclick="loginGoogle()">
@@ -182,6 +181,12 @@
     </div>
     <button class="btn-primary" onclick="doLogin()">Đăng nhập</button>
     <div id="loginMsg" style="text-align:center;font-size:13px;color:var(--red);margin-top:14px"></div>
+    <div style="text-align:center;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--text3);line-height:1.8">
+        Phát hành bởi: <strong style="color:var(--text2)">Lê Trần Anh Toàn</strong><br>
+        Vela E&amp;C &nbsp;|&nbsp; 0978.635.450
+      </div>
+    </div>
   </div>
 </div>
 
@@ -189,8 +194,7 @@
 <div id="mainApp">
   <div class="topbar">
     <div class="topbar-left">
-      <div class="topbar-logo">🏗️</div>
-      <span class="topbar-title">Vela ChamCong</span>
+      <img src="https://raw.githubusercontent.com/VelaE-C/VELA_CHAMCONG/refs/heads/main/LOGO%20VELA.png" style="height:32px;object-fit:contain" alt="Vela E&C">
     </div>
     <div class="topbar-right">
       <div class="user-badge">
@@ -344,6 +348,14 @@
       </div>
     </div>
 
+
+<!-- FOOTER -->
+<div style="text-align:center;padding:20px 16px 32px;border-top:1px solid var(--border);margin-top:8px">
+  <img src="https://raw.githubusercontent.com/VelaE-C/VELA_CHAMCONG/refs/heads/main/LOGO%20VELA.png" style="height:32px;object-fit:contain;opacity:.7;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto" alt="Vela E&C">
+  <div style="font-size:11px;color:var(--text3);line-height:1.8">
+    Phát hành bởi: <strong style="color:var(--text2)">Lê Trần Anh Toàn</strong> &nbsp;|&nbsp; Vela E&amp;C &nbsp;|&nbsp; 0978.635.450
+  </div>
+</div>
   </div>
 </div>
 
@@ -354,7 +366,7 @@
 const SUPABASE_URL = 'https://ynffvkuwdrfqlmpemhes.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_TPB6sZUqz5z6549RU8hKhQ_F83ref0J';
 const GOOGLE_CLIENT_ID = '775858800222-r25d91n7qa5454aqhb2ni6q77kds2hns.apps.googleusercontent.com';
-const APP_URL = 'https://letrananhtoankts.github.io/VELA_CHAMCONG/index.html';
+const APP_URL = 'https://velae-c.github.io/VELA_CHAMCONG/index.html';
 
 const DAYS = ['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
 
