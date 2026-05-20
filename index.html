@@ -327,10 +327,28 @@
             </div>
           </div>
           <div class="form-row">
-            <div class="field-group"><label>Dự án</label><select id="hrProject"><option value="">-- Chọn dự án --</option></select></div>
+            <div class="field-group"><label>Phạm vi dự án</label>
+              <select id="hrScope" onchange="onScopeChange()">
+                <option value="fixed">📍 Cố định — 1 dự án</option>
+                <option value="multi">🗂 Đa dự án — chọn danh sách</option>
+                <option value="all">🌐 Roaming — tất cả dự án</option>
+              </select>
+            </div>
             <div class="field-group"><label>Ngày vào làm</label><input type="date" id="hrJoinDate"></div>
           </div>
-          <button class="btn-primary" onclick="addUser()">Thêm nhân sự</button>
+          <div class="field-group" id="fixedProjectRow">
+            <label>Dự án cố định</label>
+            <select id="hrProject"><option value="">-- Chọn dự án --</option></select>
+          </div>
+          <div class="field-group" id="multiProjectRow" style="display:none">
+            <label>Danh sách dự án được phép (giữ Ctrl/Cmd để chọn nhiều)</label>
+            <select id="hrAllowedProjects" multiple style="min-height:120px"></select>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn-primary" style="flex:1" id="btnSaveUser" onclick="saveUser()">Thêm nhân sự</button>
+            <button class="btn-secondary" id="btnCancelUser" style="display:none" onclick="cancelEditUser()">Hủy</button>
+          </div>
+          <input type="hidden" id="editUserId">
         </div>
       </div>
       <div class="card">
@@ -480,6 +498,7 @@ async function loadProjects() {
 }
 
 function populateProjectSelects() {
+  populateAllowedProjectsSelect();
   ['projectSelect','teamProject','hrProject'].forEach(id => {
     const el = document.getElementById(id); if (!el) return;
     const val = el.value;
@@ -488,9 +507,27 @@ function populateProjectSelects() {
     state.projects.forEach(p => el.innerHTML += `<option value="${p.id}">${p.code} — ${p.name}</option>`);
     el.value = val;
   });
-  if (state.currentUser.project_id) {
-    const ps = document.getElementById('projectSelect');
-    if (ps) ps.value = state.currentUser.project_id;
+  // Filter checkin projects based on user scope
+  const scope = state.currentUser.project_scope || 'fixed';
+  const ps = document.getElementById('projectSelect');
+  if (ps) {
+    if (scope === 'fixed') {
+      // Show only assigned project
+      ps.innerHTML = '<option value="">-- Chọn dự án --</option>';
+      const myProj = state.projects.find(p=>p.id===state.currentUser.project_id);
+      if (myProj) {
+        ps.innerHTML += `<option value="${myProj.id}" selected>${myProj.code} — ${myProj.name}</option>`;
+      } else {
+        ps.innerHTML += '<option disabled>Chưa được gán dự án — liên hệ Admin</option>';
+      }
+    } else if (scope === 'multi') {
+      const allowed = state.currentUser.allowed_projects || [];
+      ps.innerHTML = '<option value="">-- Chọn dự án --</option>';
+      state.projects.filter(p=>allowed.includes(p.id)).forEach(p => {
+        ps.innerHTML += `<option value="${p.id}">${p.code} — ${p.name}</option>`;
+      });
+    }
+    // scope === 'all': already has all projects from populateProjectSelects
   }
 }
 
@@ -588,7 +625,7 @@ function renderUserList() {
   if (!state.users.length) { el.innerHTML='<div class="empty-state"><div class="empty-icon">👤</div>Chưa có nhân sự nào</div>'; return; }
   const roleMap = {superadmin:'🔑 Super Admin',site_admin:'🛡 Admin CT',employee:'👷 Nhân viên'};
   el.innerHTML = `<div class="att-table-wrap"><table>
-    <thead><tr><th>Mã NV</th><th>Họ tên</th><th>Email</th><th>Chức vụ</th><th>Dự án</th><th>Quyền</th><th></th></tr></thead>
+    <thead><tr><th>Mã NV</th><th>Họ tên</th><th>Email</th><th>Chức vụ</th><th>Dự án / Phạm vi</th><th>Quyền</th><th></th></tr></thead>
     <tbody>${state.users.map(u => {
       const proj = state.projects.find(p=>p.id===u.project_id);
       return `<tr>
@@ -596,15 +633,77 @@ function renderUserList() {
         <td style="color:var(--text);font-weight:500">${u.full_name}</td>
         <td style="font-size:12px">${u.email||'—'}</td>
         <td>${u.position||'—'}</td>
-        <td>${proj?proj.code:'—'}</td>
+        <td>${
+          u.project_scope==='all' ? '<span style="color:var(--blue);font-size:12px">🌐 Tất cả</span>' :
+          u.project_scope==='multi' ? '<span style="color:var(--accent);font-size:12px">🗂 Đa dự án ('+(u.allowed_projects||[]).length+')</span>' :
+          (proj?proj.code:'—')
+        }</td>
         <td><span class="badge badge-present">${roleMap[u.role]||u.role}</span></td>
-        <td><button class="btn-icon-sm" onclick="deactivateUser('${u.id}','${u.full_name}')">🗑</button></td>
+        <td style="display:flex;gap:6px">
+          <button class="btn-edit-sm" onclick="editUser('${u.id}')">✏️</button>
+          <button class="btn-icon-sm" onclick="deactivateUser('${u.id}','${u.full_name}')">🗑</button>
+        </td>
       </tr>`;
     }).join('')}</tbody>
   </table></div>`;
 }
 
-async function addUser() {
+function onScopeChange() {
+  const scope = document.getElementById('hrScope').value;
+  document.getElementById('fixedProjectRow').style.display = scope === 'fixed' ? 'block' : 'none';
+  document.getElementById('multiProjectRow').style.display = scope === 'multi' ? 'block' : 'none';
+}
+
+function populateAllowedProjectsSelect() {
+  const el = document.getElementById('hrAllowedProjects'); if(!el) return;
+  const vals = Array.from(el.selectedOptions).map(o=>o.value);
+  el.innerHTML = state.projects.map(p => `<option value="${p.id}" ${vals.includes(p.id)?'selected':''}>${p.code} — ${p.name}</option>`).join('');
+}
+
+function editUser(id) {
+  const u = state.users.find(x=>x.id===id); if(!u) return;
+  document.getElementById('editUserId').value = u.id;
+  document.getElementById('hrName').value = u.full_name;
+  document.getElementById('hrCode').value = u.employee_code || '';
+  document.getElementById('hrEmail').value = u.email || '';
+  document.getElementById('hrPhone').value = u.phone || '';
+  document.getElementById('hrPosition').value = u.position || '';
+  document.getElementById('hrRole').value = u.role;
+  document.getElementById('hrScope').value = u.project_scope || 'fixed';
+  document.getElementById('hrProject').value = u.project_id || '';
+  document.getElementById('hrJoinDate').value = u.join_date || '';
+  onScopeChange();
+  populateAllowedProjectsSelect();
+  // Pre-select allowed projects
+  if (u.allowed_projects) {
+    const sel = document.getElementById('hrAllowedProjects');
+    Array.from(sel.options).forEach(o => { o.selected = u.allowed_projects.includes(o.value); });
+  }
+  document.getElementById('btnSaveUser').textContent = 'Lưu thay đổi';
+  document.getElementById('btnCancelUser').style.display = 'inline-block';
+  document.querySelector('#tab-hrprofile .card-title').textContent = 'Chỉnh sửa nhân sự';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function cancelEditUser() {
+  document.getElementById('editUserId').value = '';
+  ['hrName','hrCode','hrEmail','hrPhone','hrPosition','hrJoinDate'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('hrRole').value = 'employee';
+  document.getElementById('hrScope').value = 'fixed';
+  document.getElementById('hrProject').value = '';
+  onScopeChange();
+  document.getElementById('btnSaveUser').textContent = 'Thêm nhân sự';
+  document.getElementById('btnCancelUser').style.display = 'none';
+  document.querySelector('#tab-hrprofile .card-title').textContent = 'Thêm nhân sự mới';
+}
+
+async function saveUser() {
+  const editId = document.getElementById('editUserId').value;
+  const scope = document.getElementById('hrScope').value;
+  const allowedSel = document.getElementById('hrAllowedProjects');
+  const allowedProjects = scope === 'multi'
+    ? Array.from(allowedSel.selectedOptions).map(o=>o.value)
+    : null;
   const body = {
     full_name: document.getElementById('hrName').value.trim(),
     employee_code: document.getElementById('hrCode').value.trim() || null,
@@ -612,15 +711,23 @@ async function addUser() {
     phone: document.getElementById('hrPhone').value.trim() || null,
     position: document.getElementById('hrPosition').value.trim() || null,
     role: document.getElementById('hrRole').value,
-    project_id: document.getElementById('hrProject').value || null,
+    project_id: scope === 'fixed' ? (document.getElementById('hrProject').value || null) : null,
+    project_scope: scope,
+    allowed_projects: allowedProjects,
     join_date: document.getElementById('hrJoinDate').value || null,
     is_active: true
   };
   if (!body.full_name||!body.email) { showToast('⚠️ Cần có họ tên và email'); return; }
+  if (scope==='multi' && (!allowedProjects||allowedProjects.length===0)) { showToast('⚠️ Chọn ít nhất 1 dự án'); return; }
   try {
-    await sbFetch('users', { method:'POST', body: JSON.stringify(body) });
-    showToast('✅ Đã thêm '+body.full_name+' — họ đăng nhập bằng Gmail là tự động vào được');
-    ['hrName','hrCode','hrEmail','hrPhone','hrPosition','hrJoinDate'].forEach(id => document.getElementById(id).value='');
+    if (editId) {
+      await sbFetch(`users?id=eq.${editId}`, { method:'PATCH', body: JSON.stringify(body) });
+      showToast('✅ Đã cập nhật '+body.full_name);
+    } else {
+      await sbFetch('users', { method:'POST', body: JSON.stringify(body) });
+      showToast('✅ Đã thêm '+body.full_name+' — đăng nhập bằng Gmail là vào được');
+    }
+    cancelEditUser();
     await loadUsers();
   } catch(e) { showToast('❌ '+e.message); }
 }
