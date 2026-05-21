@@ -467,17 +467,21 @@ async function doLogout() {
 async function initApp() {
   try {
     const email = state.session.user?.email;
-    const users = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&limit=1`);
+    const users = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&is_active=eq.true&limit=1`);
     if (!users.length) {
-      // Auto-create employee record for Google OAuth users
-      const created = await sbFetch('users', { method:'POST', body: JSON.stringify({
-        full_name: state.session.user?.user_metadata?.full_name || email.split('@')[0],
-        email, role:'employee', is_active:true
-      })});
-      state.currentUser = created[0];
-    } else {
-      state.currentUser = users[0];
+      // Email not in whitelist → reject
+      await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+        method:'POST',
+        headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+state.session.access_token}
+      });
+      localStorage.removeItem('vela_session');
+      state.session = null;
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('mainApp').style.display = 'none';
+      document.getElementById('loginMsg').textContent = '❌ Tài khoản ' + email + ' chưa được cấp quyền. Liên hệ Admin.';
+      return;
     }
+    state.currentUser = users[0];
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     const name = state.currentUser.full_name;
@@ -947,16 +951,16 @@ function renderMyTable(rows,month,year) {
   for(let d=1;d<=daysInMonth;d++) {
     const dateStr=`${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const dt=new Date(dateStr);
-    const isWe=dt.getDay()===0; // Chi CN nghi, T7 di lam
+    const isWe=false; // Tất cả các ngày đều tính công
     const r=byDate[dateStr];
     let bClass='',bLabel='';
     if(r){[bClass,bLabel]=statusMap[r.status]||['','—'];if(r.status==='present')present++;else if(r.status==='absent')absent++;else if(r.status==='leave')leave++;}
     const ct=r?new Date(r.check_time):null;
     const proj=state.projects.find(p=>p.id===r?.project_id);
-    tableRows+=`<tr style="${isWe?'opacity:.45':''}">
+    tableRows+=`<tr style="">
       <td style="font-family:monospace">${d}</td>
       <td>${DAYS[dt.getDay()]}</td>
-      <td>${r?`<span class="badge ${bClass}">${bLabel}</span>`:(isWe?'<span style="color:var(--text3);font-size:11px">Chủ nhật</span>':'<span class="badge badge-absent">— Chưa có</span>')}</td>
+      <td>${r?`<span class="badge ${bClass}">${bLabel}</span>`:(isWe?'<span style="color:var(--text3);font-size:11px">Nghỉ</span>':'<span class="badge badge-absent">— Chưa có</span>')}</td>
       <td style="font-family:monospace;font-size:12px">${ct?`${ct.getHours()}:${String(ct.getMinutes()).padStart(2,'0')}`:'—'}</td>
       <td style="font-size:12px;color:var(--text3)">${r?.distance_m?r.distance_m+'m':'—'}</td>
       <td style="font-size:12px;color:var(--text3)">${proj?proj.code:'—'}</td>
@@ -1001,7 +1005,7 @@ async function loadTeamAttendance() {
 function renderTeamTable(users,attByUser,month,year,daysInMonth,el) {
   const dayHeaders=Array.from({length:daysInMonth},(_,i)=>{
     const d=new Date(year,month-1,i+1);
-    const isWe=d.getDay()===0; // Chi CN
+    const isWe=false; // Tất cả ngày tính công
     return `<th style="text-align:center;${isWe?'color:var(--text3)':''}">${i+1}</th>`;
   }).join('');
   const tableRows=users.map(u=>{
@@ -1010,11 +1014,11 @@ function renderTeamTable(users,attByUser,month,year,daysInMonth,el) {
     const cells=Array.from({length:daysInMonth},(_,i)=>{
       const dateStr=`${year}-${String(month).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;
       const dt=new Date(dateStr);
-      const isWe=dt.getDay()===0; // Chi CN nghi, T7 di lam
+      const isWe=false; // Tất cả các ngày đều tính công
       const r=att[dateStr];
       if(r?.status==='present'||r?.status==='leave') total++;
       const cell=r?(r.status==='present'?'✅':r.status==='leave'?'🏖':'❌'):(isWe?'':' ');
-      return `<td style="text-align:center;font-size:12px;${isWe?'opacity:.3':''}">${cell}</td>`;
+      return `<td style="text-align:center;font-size:12px;${''}">${cell}</td>`;
     }).join('');
     return `<tr><td style="white-space:nowrap;font-weight:500;color:var(--text)">${u.full_name}</td><td style="text-align:center;font-family:monospace;color:var(--accent);font-weight:700">${total}</td>${cells}</tr>`;
   }).join('');
@@ -1034,7 +1038,7 @@ function exportMyExcel() {
   for(let d=1;d<=daysInMonth;d++){
     const dateStr=`${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const dt=new Date(dateStr);
-    const isWe=dt.getDay()===0; // Chi CN nghi, T7 di lam
+    const isWe=false; // Tất cả các ngày đều tính công
     const r=byDate[dateStr];
     const ct=r?new Date(r.check_time):null;
     const proj=state.projects.find(p=>p.id===r?.project_id);
