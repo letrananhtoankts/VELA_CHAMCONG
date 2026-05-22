@@ -608,12 +608,62 @@ async function loadUsers() {
   } catch(e) { console.error(e); }
 }
 
+// ── USER LIST FILTER + SORT ──
+let userSortCol = 'full_name';
+let userSortDir = 1; // 1=asc, -1=desc
+
+function populateFilterProjectSelect() {
+  const el = document.getElementById('filterProject'); if(!el) return;
+  const val = el.value;
+  el.innerHTML = '<option value="">Tất cả dự án</option>';
+  state.projects.forEach(p => el.innerHTML += `<option value="${p.id}">${p.code} — ${p.name}</option>`);
+  el.value = val;
+}
+
+function filterUsers() {
+  const name = (document.getElementById('filterName')?.value||'').toLowerCase().trim();
+  const projectId = document.getElementById('filterProject')?.value||'';
+  const role = document.getElementById('filterRole')?.value||'';
+  let filtered = state.users.filter(u => {
+    const matchName = !name ||
+      u.full_name.toLowerCase().includes(name) ||
+      (u.email||'').toLowerCase().includes(name) ||
+      (u.employee_code||'').toLowerCase().includes(name);
+    const matchProject = !projectId || u.project_id===projectId ||
+      u.project_scope==='all' ||
+      (u.allowed_projects&&u.allowed_projects.includes(projectId));
+    const matchRole = !role || u.role===role;
+    return matchName && matchProject && matchRole;
+  });
+  // Sort
+  filtered.sort((a,b) => {
+    let va = a[userSortCol]||'', vb = b[userSortCol]||'';
+    if(typeof va==='string') va=va.toLowerCase();
+    if(typeof vb==='string') vb=vb.toLowerCase();
+    return va<vb ? -userSortDir : va>vb ? userSortDir : 0;
+  });
+  const countEl = document.getElementById('filterCount');
+  if(countEl) countEl.textContent = filtered.length===state.users.length
+    ? `Tổng: ${state.users.length} nhân sự`
+    : `Hiển thị ${filtered.length} / ${state.users.length} nhân sự`;
+  renderUserListData(filtered);
+}
+
+function sortUserBy(col) {
+  if(userSortCol===col) userSortDir*=-1; else { userSortCol=col; userSortDir=1; }
+  filterUsers();
+}
+
+function clearFilterUsers() {
+  ['filterName','filterProject','filterRole'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  filterUsers();
+}
+
 function renderUserList() {
   populateFilterProjectSelect();
   filterUsers();
-  // Update count
-  const countEl = document.getElementById('filterCount');
-  if (countEl) countEl.textContent = `Tổng: ${state.users.length} nhân sự`;
 }
 
 function renderUserListData(users) {
@@ -623,18 +673,29 @@ function renderUserListData(users) {
     return;
   }
   const roleMap = {superadmin:'🔑 Super Admin',site_admin:'🛡 Admin CT',employee:'👷 Nhân viên'};
+  const sCols = [
+    ['employee_code','Mã NV'],['full_name','Họ tên'],['email','Email'],
+    ['position','Chức vụ'],['project_id','Dự án'],['role','Quyền'],['','']
+  ];
+  const thStyle = 'cursor:pointer;user-select:none;white-space:nowrap';
+  const arrow = col => col===userSortCol ? (userSortDir===1?' ↑':' ↓') : ' ↕';
+  const headers = sCols.map(([col,label])=>
+    col ? `<th style="${thStyle}" onclick="sortUserBy('${col}')">${label}${arrow(col)}</th>`
+        : '<th></th>'
+  ).join('');
   el.innerHTML = `<div class="att-table-wrap"><table>
-    <thead><tr><th>Mã NV</th><th>Họ tên</th><th>Email</th><th>Chức vụ</th><th>Dự án / Phạm vi</th><th>Quyền</th><th></th></tr></thead>
-    <tbody>${users.map(u => {
+    <thead><tr>${headers}</tr></thead>
+    <tbody>${users.map((u,i) => {
       const proj = state.projects.find(p=>p.id===u.project_id);
-      return `<tr>
+      const rowBg = i%2===0?'':'background:rgba(255,255,255,.02)';
+      return `<tr style="${rowBg}">
         <td style="font-family:monospace;color:var(--accent)">${u.employee_code||'—'}</td>
         <td style="color:var(--text);font-weight:500">${u.full_name}</td>
         <td style="font-size:12px">${u.email||'—'}</td>
         <td>${u.position||'—'}</td>
         <td>${
           u.project_scope==='all' ? '<span style="color:var(--blue);font-size:12px">🌐 Tất cả</span>' :
-          u.project_scope==='multi' ? '<span style="color:var(--accent);font-size:12px">🗂 Đa dự án ('+(u.allowed_projects||[]).length+')</span>' :
+          u.project_scope==='multi' ? `<span style="color:var(--accent);font-size:12px">🗂 Đa dự án (${(u.allowed_projects||[]).length})</span>` :
           (proj?proj.code:'—')
         }</td>
         <td><span class="badge badge-present">${roleMap[u.role]||u.role}</span></td>
