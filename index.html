@@ -1,1400 +1,439 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0f1923">
-<title>Vela ChamCong</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
-  :root {
-    --bg:#0f1923;--bg2:#162030;--bg3:#1e2d40;--border:#2a3d54;
-    --accent:#f5a623;--accent2:#e8961a;--green:#27c47a;--red:#e85555;--blue:#4a9eff;
-    --text:#e8edf2;--text2:#8fa8c0;--text3:#5a7a96;--card-shadow:0 4px 24px rgba(0,0,0,0.4);
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VELA E&C — Cổng Thông Tin Nội Bộ</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --vela-red: #E8410A;
+      --vela-red-light: rgba(232,65,10,0.08);
+      --vela-red-border: rgba(232,65,10,0.25);
+      --dark: #1a1a1a;
+      --font: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: #f4f4f2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #1a1a1a;
+    }
 
-  /* LOGIN */
-  #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0a1220,#0f1923,#162030);position:relative}
-  #loginScreen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(245,166,35,.08),transparent 60%),radial-gradient(ellipse at 70% 20%,rgba(74,158,255,.06),transparent 50%)}
-  .login-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:48px 40px;width:100%;max-width:420px;position:relative;box-shadow:var(--card-shadow)}
-  .login-logo{text-align:center;margin-bottom:32px}
-  .logo-mark{display:inline-flex;align-items:center;gap:10px;margin-bottom:8px}
-  .logo-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
-  .logo-text{font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.5px}
-  .logo-sub{font-size:13px;color:var(--text3);letter-spacing:.5px;text-transform:uppercase}
-  .divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text3);font-size:12px}
-  .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
-  .btn-google{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:13px;color:var(--text);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;margin-bottom:16px}
-  .btn-google:hover{border-color:var(--accent);background:var(--bg2)}
-  .google-icon{width:20px;height:20px}
-  .field-group{margin-bottom:16px}
-  .field-group label{display:block;font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
-  .field-group input,.field-group select,.field-group textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:inherit;font-size:15px;outline:none;transition:border-color .2s}
-  .field-group input:focus,.field-group select:focus,.field-group textarea:focus{border-color:var(--accent)}
-  .field-group textarea{resize:vertical;min-height:80px}
-  .btn-primary{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;padding:14px;color:#0f1923;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .1s}
-  .btn-primary:hover{opacity:.9}
-  .btn-primary:active{transform:scale(.98)}
-  .btn-primary:disabled{opacity:.5;cursor:not-allowed}
+    /* HEADER */
+    .header {
+      background: var(--dark);
+      border-bottom: 3px solid var(--vela-red);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .header-logo { height: 38px; object-fit: contain; display: block; }
+    .header-divider { width: 1px; height: 28px; background: rgba(255,255,255,0.18); }
+    .header-label {
+      color: rgba(255,255,255,0.7);
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .header-right {
+      display: flex; align-items: center; gap: 6px;
+      color: rgba(255,255,255,0.35);
+      font-size: 12px;
+    }
+    .header-right svg { opacity: 0.4; }
 
-  /* TOPBAR */
-  #mainApp{display:none}
-  .topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-  .topbar-left{display:flex;align-items:center;gap:10px}
-  .topbar-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
-  .topbar-title{font-size:16px;font-weight:700}
-  .topbar-right{display:flex;align-items:center;gap:10px}
-  .user-badge{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:6px 12px 6px 8px;font-size:13px;color:var(--text2)}
-  .avatar{width:24px;height:24px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--bg)}
-  .btn-logout{background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--text3);font-family:inherit;font-size:12px;cursor:pointer;transition:all .2s}
-  .btn-logout:hover{border-color:var(--red);color:var(--red)}
+    /* TOP BANNER */
+    .topbar {
+      background: var(--vela-red);
+      padding: 7px 2rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .topbar svg { flex-shrink: 0; }
+    .topbar span { color: rgba(255,255,255,0.95); font-size: 12.5px; line-height: 1.4; }
 
-  /* NAV */
-  .nav-tabs{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 20px;gap:4px}
-  .nav-tab{padding:12px 18px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
-  .nav-tab:hover{color:var(--text2)}
-  .nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+    /* HERO */
+    .hero {
+      background: var(--dark);
+      padding: 3.5rem 2rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.03) 39px, rgba(255,255,255,0.03) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.03) 39px, rgba(255,255,255,0.03) 40px);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(232,65,10,0.12);
+      border: 1px solid rgba(232,65,10,0.35);
+      color: #f07050;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 1.25rem;
+    }
+    .hero-title {
+      color: #ffffff;
+      font-size: 24px;
+      font-weight: 500;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+    .hero-sub {
+      color: rgba(255,255,255,0.45);
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 500px;
+      margin: 0 auto;
+    }
 
-  /* CONTENT */
-  .content{padding:20px;max-width:960px;margin:0 auto}
-  .tab-pane{display:none}
-  .tab-pane.active{display:block}
-  .card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:var(--card-shadow)}
-  .card-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:20px}
+    /* MAIN */
+    .main {
+      flex: 1;
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 3rem;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1.25rem;
+    }
+    .section-header-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #888;
+      white-space: nowrap;
+    }
+    .section-header-line { flex: 1; height: 0.5px; background: #d8d8d4; }
 
-  /* CHECKIN */
-  .checkin-hero{text-align:center;padding:32px 16px}
-  .date-display{font-size:13px;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:6px}
-  .time-display{font-size:52px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text);letter-spacing:-2px;line-height:1;margin-bottom:4px}
-  .day-display{font-size:15px;color:var(--text2);margin-bottom:28px}
-  .project-selector{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
-  .project-selector select{background:none;border:none;color:var(--text);font-family:inherit;font-size:15px;font-weight:500;outline:none;flex:1;cursor:pointer}
-  .project-selector select option{background:var(--bg3)}
-  .location-status{display:flex;align-items:center;gap:10px;background:var(--bg3);border-radius:12px;padding:12px 18px;margin-bottom:24px;font-size:13px;color:var(--text2)}
-  .loc-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-  .loc-dot.checking{background:var(--accent);animation:pulse 1s infinite}
-  .loc-dot.ok{background:var(--green)}
-  .loc-dot.fail{background:var(--red)}
-  .loc-dot.idle{background:var(--text3)}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-  .btn-checkin{width:170px;height:170px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;margin:0 auto 20px;box-shadow:0 0 0 16px rgba(245,166,35,.08),0 0 0 32px rgba(245,166,35,.04);transition:transform .2s,box-shadow .2s;font-family:inherit}
-  .btn-checkin:hover{transform:scale(1.04);box-shadow:0 0 0 20px rgba(245,166,35,.12),0 0 0 40px rgba(245,166,35,.06)}
-  .btn-checkin:active{transform:scale(.97)}
-  .btn-checkin:disabled{opacity:.5;cursor:not-allowed;transform:none}
-  .btn-checkin .btn-icon{font-size:38px}
-  .btn-checkin .btn-label{font-size:14px;font-weight:700;color:var(--bg)}
-  .btn-checkin.done{background:linear-gradient(135deg,var(--green),#1fa864);box-shadow:0 0 0 16px rgba(39,196,122,.08),0 0 0 32px rgba(39,196,122,.04)}
-  .checkin-result{background:var(--bg3);border-radius:12px;padding:14px 20px;font-size:14px;color:var(--text2);text-align:center;min-height:50px;display:flex;align-items:center;justify-content:center}
+    /* APP CARDS */
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 2.5rem;
+    }
+    .app-card {
+      background: #ffffff;
+      border: 1px solid #e0ddd8;
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.18s, box-shadow 0.18s, transform 0.15s;
+    }
+    .app-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--vela-red);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.22s ease;
+    }
+    .app-card:hover {
+      border-color: #c8c5be;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      transform: translateY(-3px);
+    }
+    .app-card:hover::after { transform: scaleX(1); }
 
-  /* TABLE */
-  .month-nav{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-  .month-nav select{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:inherit;font-size:14px;outline:none}
-  .btn-load{background:var(--accent);border:none;border-radius:8px;padding:8px 18px;color:var(--bg);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .2s}
-  .btn-load:hover{opacity:.85}
-  .btn-export{background:var(--bg3);border:1px solid var(--green);border-radius:8px;padding:8px 18px;color:var(--green);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
-  .btn-export:hover{background:rgba(39,196,122,.1)}
-  .att-table-wrap{overflow-x:auto}
-  table{width:100%;border-collapse:collapse;font-size:13px}
-  th{text-align:left;padding:10px 12px;color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);white-space:nowrap}
-  td{padding:11px 12px;border-bottom:1px solid rgba(42,61,84,.5);color:var(--text2);vertical-align:middle}
-  tr:hover td{background:rgba(255,255,255,.02)}
-  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
-  .badge-present{background:rgba(39,196,122,.15);color:var(--green)}
-  .badge-absent{background:rgba(232,85,85,.15);color:var(--red)}
-  .badge-leave{background:rgba(74,158,255,.15);color:var(--blue)}
-  .badge-holiday{background:rgba(245,166,35,.15);color:var(--accent)}
+    .app-icon {
+      width: 50px; height: 50px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.125rem;
+      border: 1px solid var(--vela-red-border);
+      background: var(--vela-red-light);
+    }
+    .app-icon svg { color: var(--vela-red); }
 
-  /* STATS */
-  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px}
-  .stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
-  .stat-value{font-size:26px;font-weight:700;font-family:'JetBrains Mono',monospace;margin-bottom:4px}
-  .stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--text3)}
+    .app-tag {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-bottom: 8px;
+      width: fit-content;
+    }
+    .tag-hr   { background: rgba(232,65,10,0.1);  color: #b83000; }
+    .tag-pm   { background: rgba(24,95,165,0.1);  color: #185FA5; }
+    .tag-time { background: rgba(59,109,17,0.1);  color: #3B6D11; }
 
-  /* PROJECTS */
-  .project-list{display:grid;gap:10px}
-  .project-item{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px}
-  .project-item .pcode{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);background:rgba(245,166,35,.1);border-radius:6px;padding:4px 8px;flex-shrink:0}
-  .project-item .pinfo{flex:1}
-  .project-item .pname{font-weight:600;font-size:14px;color:var(--text)}
-  .project-item .paddr{font-size:12px;color:var(--text3);margin-top:2px}
-  .project-item .pradius{font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;flex-shrink:0}
-  .btn-icon-sm{background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text3);font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit}
-  .btn-icon-sm:hover{border-color:var(--red);color:var(--red)}
-  .btn-edit-sm{background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text3);font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit}
-  .btn-edit-sm:hover{border-color:var(--accent);color:var(--accent)}
+    .app-name {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .app-desc {
+      font-size: 13.5px;
+      color: #666;
+      line-height: 1.65;
+      flex: 1;
+      margin-bottom: 1.25rem;
+    }
+    .app-cta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--vela-red);
+      margin-top: auto;
+    }
+    .app-cta svg { transition: transform 0.15s; }
+    .app-card:hover .app-cta svg { transform: translateX(4px); }
+    .app-card-external {
+      position: absolute;
+      top: 14px; right: 14px;
+      color: #ccc;
+    }
 
-  /* HR */
-  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  @media(max-width:600px){.form-row{grid-template-columns:1fr}}
-  .admin-form{display:grid;gap:14px}
-  .btn-secondary{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 20px;color:var(--text2);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s}
-  .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+    /* INFO BOX */
+    .info-box {
+      background: #fff;
+      border: 1px solid #e0ddd8;
+      border-left: 3px solid var(--vela-red);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .info-box svg { flex-shrink: 0; margin-top: 1px; color: var(--vela-red); }
+    .info-box-title { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 3px; }
+    .info-box-desc  { font-size: 12.5px; color: #777; line-height: 1.55; }
 
-  /* MODAL */
-  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
-  .modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
-  .modal-title{font-size:16px;font-weight:700;margin-bottom:20px;color:var(--text)}
-  .modal-actions{display:flex;gap:10px;margin-top:20px}
+    /* FOOTER */
+    .footer {
+      background: var(--dark);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .footer-left  { font-size: 12px; color: rgba(255,255,255,0.3); }
+    .footer-right { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: rgba(255,255,255,0.3); }
+    .footer-dot   { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.15); }
 
-  /* TOAST */
-  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 24px;font-size:14px;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,.5);transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap}
-  #toast.show{transform:translateX(-50%) translateY(0)}
-  .loading{text-align:center;padding:40px;color:var(--text3);font-size:14px}
-  .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .empty-state{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px}
-  .empty-icon{font-size:36px;margin-bottom:12px}
-  ::-webkit-scrollbar{width:6px;height:6px}
-  ::-webkit-scrollbar-track{background:var(--bg)}
-  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-</style>
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero-content              { animation: fadeUp 0.5s ease both; }
+    .app-card:nth-child(1)     { animation: fadeUp 0.45s 0.10s ease both; }
+    .app-card:nth-child(2)     { animation: fadeUp 0.45s 0.18s ease both; }
+    .app-card:nth-child(3)     { animation: fadeUp 0.45s 0.26s ease both; }
+    .info-box                  { animation: fadeUp 0.45s 0.35s ease both; }
+
+    @media (max-width: 600px) {
+      .header-label, .header-divider { display: none; }
+      .hero  { padding: 2.5rem 1.25rem 2.25rem; }
+      .main  { padding: 1.75rem 1.25rem 2rem; }
+      .hero-title { font-size: 20px; }
+      .footer { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="loginScreen">
-  <div class="login-card">
-    <div class="login-logo">
-      <div class="logo-mark" style="flex-direction:column;gap:6px">
-        <img src="https://raw.githubusercontent.com/VelaE-C/VELA_CHAMCONG/refs/heads/main/LOGO%20VELA.png" style="height:56px;object-fit:contain" alt="Vela E&C">
-      </div>
-      <div class="logo-sub" style="margin-top:8px">Hệ thống chấm công công trường</div>
-    </div>
-
-    <button class="btn-google" onclick="loginGoogle()">
-      <svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-      Đăng nhập bằng Google
-    </button>
-    <div id="loginMsg" style="text-align:center;font-size:13px;color:var(--red);margin-top:14px"></div>
-    <div style="text-align:center;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
-      <div style="font-size:11px;color:var(--text3);line-height:1.8">
-        Phát hành bởi: <strong style="color:var(--text2)">Lê Trần Anh Toàn</strong><br>
-        Vela E&amp;C &nbsp;|&nbsp; 0978.635.450
-      </div>
-    </div>
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <img class="header-logo"
+      src="https://raw.githubusercontent.com/VelaE-C/VELA_CHAMCONG/refs/heads/main/LOGO%20VELA.png"
+      alt="VELA E&C" onerror="this.style.display='none'" />
+    <div class="header-divider"></div>
+    <span class="header-label">Cổng thông tin nội bộ</span>
   </div>
+  <div class="header-right">
+    <!-- icon: factory / building -->
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 21h18M3 7v14M21 7v14M6 21V11l6-4v14M15 21v-7l3-3v10M9 21v-4h3v4"/>
+    </svg>
+    <span>VELA E&amp;C INNOVATION</span>
+  </div>
+</header>
+
+<!-- TOP BANNER -->
+<div class="topbar">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+  </svg>
+  <span>Chọn ứng dụng bên dưới để truy cập — mỗi ứng dụng yêu cầu đăng nhập riêng bằng tài khoản được cấp quyền.</span>
 </div>
 
-<!-- MAIN APP -->
-<div id="mainApp">
-  <div class="topbar">
-    <div class="topbar-left">
-      <img src="https://raw.githubusercontent.com/VelaE-C/VELA_CHAMCONG/refs/heads/main/LOGO%20VELA.png" style="height:32px;object-fit:contain" alt="Vela E&C">
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+      </svg>
+      Hệ thống quản lý
     </div>
-    <div class="topbar-right">
-      <div class="user-badge">
-        <div class="avatar" id="userAvatar">?</div>
-        <span id="userName">...</span>
+    <h1 class="hero-title">Công ty Cổ phần Kỹ thuật Xây dựng VELA</h1>
+    <p class="hero-sub">Các công cụ quản lý vận hành dự án — dành cho cán bộ nhân viên VELA E&amp;C</p>
+  </div>
+</section>
+
+<!-- MAIN -->
+<main class="main">
+
+  <div class="section-header">
+    <span class="section-header-label">Ứng dụng nội bộ</span>
+    <div class="section-header-line"></div>
+  </div>
+
+  <div class="app-grid">
+
+    <!-- App 1: Báo cáo quân số -->
+    <a class="app-card" href="https://velae-c.github.io/mainpower/" target="_blank" rel="noopener noreferrer">
+      <!-- external link icon -->
+      <svg class="app-card-external" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+      </svg>
+      <!-- icon: group of people (quân số) -->
+      <div class="app-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#E8410A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="7" r="3"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+          <circle cx="17" cy="7" r="3" opacity="0.5"/><path d="M21 21v-2a4 4 0 0 0-3-3.87" opacity="0.5"/>
+        </svg>
       </div>
-      <button class="btn-logout" onclick="doLogout()">Đăng xuất</button>
+      <span class="app-tag tag-hr">Nhân sự</span>
+      <div class="app-name">Báo cáo quân số</div>
+      <p class="app-desc">Theo dõi lực lượng thi công tại các dự án — tổng hợp nhân công theo ca, đội nhóm và công trường.</p>
+      <div class="app-cta">
+        Vào ứng dụng
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </div>
+    </a>
+
+    <!-- App 2: Tiến độ & Sản lượng -->
+    <a class="app-card" href="https://letrananhtoankts.github.io/VELA_TIENDO/" target="_blank" rel="noopener noreferrer">
+      <svg class="app-card-external" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+      </svg>
+      <!-- icon: bar chart (tiến độ) -->
+      <div class="app-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#E8410A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6"  y1="20" x2="6"  y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
+        </svg>
+      </div>
+      <span class="app-tag tag-pm">Tiến độ</span>
+      <div class="app-name">Tiến độ &amp; Sản lượng</div>
+      <p class="app-desc">Cập nhật và theo dõi tiến độ thi công, sản lượng hoàn thành theo từng hạng mục và dự án.</p>
+      <div class="app-cta">
+        Vào ứng dụng
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </div>
+    </a>
+
+    <!-- App 3: Chấm công -->
+    <a class="app-card" href="https://velae-c.github.io/VELA_CHAMCONG/" target="_blank" rel="noopener noreferrer">
+      <svg class="app-card-external" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+      </svg>
+      <!-- icon: clock with checkmark (chấm công) -->
+      <div class="app-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#E8410A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <polyline points="12 7 12 12 15 14"/>
+          <polyline points="9 18 11 20 15 16" stroke-width="1.9"/>
+        </svg>
+      </div>
+      <span class="app-tag tag-time">Chấm công</span>
+      <div class="app-name">Chấm công</div>
+      <p class="app-desc">Ghi nhận và quản lý thời gian làm việc của cán bộ công nhân viên tại các công trường dự án.</p>
+      <div class="app-cta">
+        Vào ứng dụng
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-header">
+    <span class="section-header-label">Hỗ trợ</span>
+    <div class="section-header-line"></div>
+  </div>
+
+  <div class="info-box">
+    <!-- icon: shield lock -->
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8410A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <rect x="9" y="11" width="6" height="5" rx="1"/><path d="M12 11V9a2 2 0 0 1 4 0"/>
+    </svg>
+    <div>
+      <div class="info-box-title">Quyền truy cập bị giới hạn</div>
+      <div class="info-box-desc">Mỗi ứng dụng yêu cầu tài khoản Google được cấp quyền trước. Liên hệ quản trị viên hệ thống nếu bạn gặp lỗi đăng nhập hoặc chưa được cấp quyền vào ứng dụng tương ứng.</div>
     </div>
   </div>
 
-  <div class="nav-tabs">
-    <button class="nav-tab active" data-tab="checkin" onclick="switchTab(this,'checkin')">⏱ Chấm Công</button>
-    <button class="nav-tab" data-tab="mytable" onclick="switchTab(this,'mytable')">📋 Bảng Công Tôi</button>
-    <button class="nav-tab admin-only" data-tab="teamtable" onclick="switchTab(this,'teamtable')" style="display:none">👥 Bảng Công Nhóm</button>
-    <button class="nav-tab admin-only" data-tab="projects" onclick="switchTab(this,'projects')" style="display:none">🗂 Dự Án</button>
-    <button class="nav-tab admin-only" data-tab="hrprofile" onclick="switchTab(this,'hrprofile')" style="display:none">👤 Nhân Sự</button>
-    <button class="nav-tab admin-only" data-tab="warnings" onclick="switchTab(this,'warnings');loadWarnings()" style="display:none">⚠️ Cảnh Báo</button>
-  </div>
-
-  <div class="content">
-
-    <!-- CHECKIN -->
-    <div class="tab-pane active" id="tab-checkin">
-      <div class="card">
-        <div class="checkin-hero">
-          <div class="date-display" id="dateDisplay">--/--/----</div>
-          <div class="time-display" id="timeDisplay">--:--:--</div>
-          <div class="day-display" id="dayDisplay">---</div>
-          <div class="location-status" id="locationStatus">
-            <div class="loc-dot idle" id="locDot"></div>
-            <span id="locText">Chưa lấy vị trí</span>
-          </div>
-          <!-- Auto-detected project display -->
-          <div id="detectedProject" style="display:none;background:rgba(39,196,122,.08);border:1px solid rgba(39,196,122,.2);border-radius:12px;padding:12px 18px;margin-bottom:20px;font-size:14px;color:var(--green);text-align:center">
-            <span id="detectedProjectName"></span>
-          </div>
-          <!-- Manual fallback selector (roaming users / multiple matches) -->
-          <div id="manualProjectRow" style="display:none;margin-bottom:16px">
-            <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-align:center">⚠️ Phát hiện nhiều dự án — chọn dự án đang làm việc:</div>
-            <select id="projectSelect" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:inherit;font-size:14px;outline:none;margin-bottom:10px">
-              <option value="">-- Chọn dự án --</option>
-            </select>
-            <button onclick="confirmManualCheckin()" style="width:100%;background:var(--green);border:none;border-radius:10px;padding:12px;color:#fff;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">Xác nhận chấm công</button>
-          </div>
-          <input type="hidden" id="detectedProjectId">
-          <button class="btn-checkin" id="checkinBtn" onclick="doCheckin()">
-            <div class="btn-icon">✅</div>
-            <div class="btn-label">CHẤM CÔNG</div>
-          </button>
-          <div class="checkin-result" id="checkinResult">Nhấn nút để tự động xác định vị trí và chấm công</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MY TABLE -->
-    <div class="tab-pane" id="tab-mytable">
-      <div class="card">
-        <div class="card-title">Bảng công của tôi</div>
-        <div class="month-nav">
-          <select id="myMonth"></select>
-          <select id="myYear"></select>
-          <button class="btn-load" onclick="loadMyAttendance()">Xem</button>
-          <button class="btn-export" onclick="exportMyExcel()">⬇ Excel</button>
-        </div>
-        <div class="stats-grid" id="myStats"></div>
-        <div class="att-table-wrap" id="myTableContent">
-          <div class="empty-state"><div class="empty-icon">📋</div>Chọn tháng và nhấn Xem</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TEAM TABLE -->
-    <div class="tab-pane" id="tab-teamtable">
-      <div class="card">
-        <div class="card-title">Bảng công nhóm</div>
-        <div class="month-nav">
-          <select id="teamProject"><option value="">-- Tất cả dự án --</option></select>
-          <select id="teamMonth"></select>
-          <select id="teamYear"></select>
-          <button class="btn-load" onclick="loadTeamAttendance()">Xem</button>
-          <button class="btn-export" onclick="exportTeamExcel()">⬇ Excel</button>
-        </div>
-        <div id="teamTableContent" class="empty-state">
-          <div class="empty-icon">👥</div>Chọn tháng và nhấn Xem
-        </div>
-      </div>
-    </div>
-
-    <!-- PROJECTS -->
-    <div class="tab-pane" id="tab-projects">
-      <div class="card">
-        <div class="card-title" id="projectFormTitle">Thêm dự án mới</div>
-        <div class="admin-form">
-          <input type="hidden" id="editProjectId">
-          <div class="form-row">
-            <div class="field-group"><label>Mã dự án</label><input type="text" id="pjCode" placeholder="VG-B13"></div>
-            <div class="field-group"><label>Tên dự án</label><input type="text" id="pjName" placeholder="Sycamore B13"></div>
-          </div>
-          <div class="field-group"><label>Địa chỉ</label><input type="text" id="pjAddr" placeholder="Quy Nhơn, Bình Định"></div>
-          <div class="form-row">
-            <div class="field-group"><label>Vĩ độ (Latitude)</label><input type="number" id="pjLat" placeholder="13.7760" step="any"></div>
-            <div class="field-group"><label>Kinh độ (Longitude)</label><input type="number" id="pjLng" placeholder="109.2241" step="any"></div>
-          </div>
-          <div class="field-group"><label>Bán kính chấm công (mét)</label><input type="number" id="pjRadius" value="250" min="50" max="1000"></div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn-primary" style="flex:1;min-width:140px" onclick="saveProject()">Lưu dự án</button>
-            <button class="btn-secondary" onclick="getCurrentLocation()">📍 Vị trí hiện tại</button>
-            <button class="btn-secondary" onclick="cancelEditProject()" id="btnCancelEdit" style="display:none">Hủy</button>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Danh sách dự án</div>
-        <div id="projectList" class="loading"><span class="spinner"></span> Đang tải...</div>
-      </div>
-    </div>
-
-    <!-- HR -->
-    <div class="tab-pane" id="tab-hrprofile">
-      <div class="card">
-        <div class="card-title">Thêm nhân sự mới</div>
-        <div class="admin-form">
-          <div class="form-row">
-            <div class="field-group"><label>Họ tên</label><input type="text" id="hrName" placeholder="Nguyễn Văn A"></div>
-            <div class="field-group"><label>Mã nhân viên</label><input type="text" id="hrCode" placeholder="VL-001"></div>
-          </div>
-          <div class="form-row">
-            <div class="field-group"><label>Email (dùng để đăng nhập Google)</label><input type="email" id="hrEmail" placeholder="nva@gmail.com"></div>
-            <div class="field-group"><label>Số điện thoại</label><input type="text" id="hrPhone" placeholder="0901234567"></div>
-          </div>
-          <div class="form-row">
-            <div class="field-group"><label>Chức vụ</label><input type="text" id="hrPosition" placeholder="Kỹ sư công trường"></div>
-            <div class="field-group"><label>Phân quyền</label>
-              <select id="hrRole">
-                <option value="employee">👷 Nhân viên</option>
-                <option value="site_admin">🛡 Admin công trình</option>
-                <option value="superadmin">🔑 Super Admin</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="field-group"><label>Phạm vi dự án</label>
-              <select id="hrScope" onchange="onScopeChange()">
-                <option value="fixed">📍 Cố định — 1 dự án</option>
-                <option value="multi">🗂 Đa dự án — chọn danh sách</option>
-                <option value="all">🌐 Roaming — tất cả dự án</option>
-              </select>
-            </div>
-            <div class="field-group"><label>Ngày vào làm</label><input type="date" id="hrJoinDate"></div>
-          </div>
-          <div class="field-group" id="fixedProjectRow">
-            <label>Dự án cố định</label>
-            <select id="hrProject"><option value="">-- Chọn dự án --</option></select>
-          </div>
-          <div class="field-group" id="multiProjectRow" style="display:none">
-            <label>Danh sách dự án được phép (giữ Ctrl/Cmd để chọn nhiều)</label>
-            <select id="hrAllowedProjects" multiple style="min-height:120px"></select>
-          </div>
-          <div style="display:flex;gap:10px">
-            <button class="btn-primary" style="flex:1" id="btnSaveUser" onclick="saveUser()">Thêm nhân sự</button>
-            <button class="btn-secondary" id="btnCancelUser" style="display:none" onclick="cancelEditUser()">Hủy</button>
-          </div>
-          <input type="hidden" id="editUserId">
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Danh sách nhân sự</div>
-        <!-- Filter bar -->
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
-          <input type="text" id="filterName" placeholder="🔍 Tìm tên, email, mã NV..."
-            oninput="filterUsers()"
-            style="flex:2;min-width:160px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 14px;color:var(--text);font-family:inherit;font-size:13px;outline:none">
-          <select id="filterProject" onchange="filterUsers()"
-            style="flex:1;min-width:130px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none">
-            <option value="">Tất cả dự án</option>
-          </select>
-          <select id="filterRole" onchange="filterUsers()"
-            style="flex:1;min-width:130px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none">
-            <option value="">Tất cả quyền</option>
-            <option value="superadmin">🔑 Super Admin</option>
-            <option value="site_admin">🛡 Admin CT</option>
-            <option value="employee">👷 Nhân viên</option>
-          </select>
-          <button onclick="clearFilterUsers()"
-            style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 14px;color:var(--text3);font-family:inherit;font-size:13px;cursor:pointer;white-space:nowrap;transition:all .2s"
-            onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
-            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text3)'">✕ Xóa lọc</button>
-        </div>
-        <div id="filterCount" style="font-size:12px;color:var(--text3);margin-bottom:10px"></div>
-        <div id="userList" class="loading"><span class="spinner"></span> Đang tải...</div>
-      </div>
-    </div>
-
-  <!-- WARNINGS TAB -->
-    <div class="tab-pane" id="tab-warnings">
-      <div class="card">
-        <div class="card-title">⚠️ Phát hiện chấm công hộ</div>
-        <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Danh sách các trường hợp nhiều tài khoản chấm công từ cùng một thiết bị trong cùng một ngày.</p>
-        <div id="warningList" class="empty-state"><div class="empty-icon">✅</div>Chưa phát hiện trường hợp bất thường</div>
-      </div>
-    </div>
-
+</main>
 
 <!-- FOOTER -->
-<div style="text-align:center;padding:20px 16px 32px;border-top:1px solid var(--border);margin-top:8px">
-  <img src="https://raw.githubusercontent.com/VelaE-C/VELA_CHAMCONG/refs/heads/main/LOGO%20VELA.png" style="height:32px;object-fit:contain;opacity:.7;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto" alt="Vela E&C">
-  <div style="font-size:11px;color:var(--text3);line-height:1.8">
-    Phát hành bởi: <strong style="color:var(--text2)">Lê Trần Anh Toàn</strong> &nbsp;|&nbsp; Vela E&amp;C &nbsp;|&nbsp; 0978.635.450
+<footer class="footer">
+  <span class="footer-left">© 2026 Công ty Cổ phần Kỹ thuật Xây dựng VELA. All rights reserved.</span>
+  <div class="footer-right">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#E8410A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+    </svg>
+    <span>Internal Portal</span>
+    <div class="footer-dot"></div>
+    <span>v1.1</span>
   </div>
-</div>
-  </div>
-</div>
+</footer>
 
-<!-- EDIT PROJECT MODAL (inline handled) -->
-<div id="toast"></div>
-
-<script>
-const SUPABASE_URL = 'https://ynffvkuwdrfqlmpemhes.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_TPB6sZUqz5z6549RU8hKhQ_F83ref0J';
-const GOOGLE_CLIENT_ID = '775858800222-r25d91n7qa5454aqhb2ni6q77kds2hns.apps.googleusercontent.com';
-const APP_URL = 'https://velae-c.github.io/VELA_CHAMCONG/';
-
-const DAYS = ['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
-
-// Lấy ngày local (tránh lệch UTC+7)
-function localDateStr(date) {
-  const d = date || new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  const day = String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
-}
-const MONTHS_VI = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
-
-let state = { session: null, currentUser: null, projects: [], users: [], checkedInToday: false, lastAttData: null, lastTeamData: null };
-
-// ── SUPABASE HELPERS ──
-async function sbFetch(path, options = {}) {
-  const headers = {
-    'apikey': SUPABASE_KEY,
-    'Content-Type': 'application/json',
-    'Prefer': 'return=representation',
-    ...options.headers
-  };
-  headers['Authorization'] = state.session?.access_token ? `Bearer ${state.session.access_token}` : `Bearer ${SUPABASE_KEY}`;
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { ...options, headers });
-  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.message || `HTTP ${res.status}`); }
-  const t = await res.text(); return t ? JSON.parse(t) : [];
-}
-
-async function sbAuth(path, body) {
-  const res = await fetch(`${SUPABASE_URL}/auth/v1/${path}`, {
-    method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  const d = await res.json();
-  if (!res.ok) throw new Error(d.error_description || d.msg || 'Auth error');
-  return d;
-}
-
-// ── AUTH ──
-function loginGoogle() {
-  const redirectTo = encodeURIComponent(APP_URL);
-  window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectTo}`;
-}
-
-// Email/password login removed
-
-// Email/password login removed
-
-async function doLogout() {
-  localStorage.removeItem('vela_session');
-  state = { session:null, currentUser:null, projects:[], users:[], checkedInToday:false, lastAttData:null, lastTeamData:null };
-  document.getElementById('mainApp').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'flex';
-}
-
-async function initApp() {
-  try {
-    const email = state.session.user?.email;
-    const users = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&is_active=eq.true&limit=1`);
-    if (!users.length) {
-      // Email not in whitelist → reject
-      await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
-        method:'POST',
-        headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+state.session.access_token}
-      });
-      localStorage.removeItem('vela_session');
-      state.session = null;
-      document.getElementById('loginScreen').style.display = 'flex';
-      document.getElementById('mainApp').style.display = 'none';
-      document.getElementById('loginMsg').textContent = '❌ Tài khoản ' + email + ' chưa được cấp quyền. Liên hệ Admin.';
-      return;
-    }
-    state.currentUser = users[0];
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    const name = state.currentUser.full_name;
-    document.getElementById('userName').textContent = name;
-    document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-    if (['superadmin','site_admin'].includes(state.currentUser.role)) {
-      document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
-    }
-    await loadProjects();
-    await loadUsers();
-    startClock();
-    await checkTodayAttendance();
-    populateMonthSelectors();
-  } catch(e) { showToast('❌ '+e.message); doLogout(); }
-}
-
-// ── PROJECTS ──
-async function loadProjects() {
-  try {
-    let url = 'projects?is_active=eq.true&order=name';
-    if (state.currentUser.role === 'site_admin' && state.currentUser.project_id)
-      url = `projects?id=eq.${state.currentUser.project_id}`;
-    state.projects = await sbFetch(url);
-    populateProjectSelects();
-    renderProjectList();
-  } catch(e) { console.error(e); }
-}
-
-function populateProjectSelects() {
-  populateAllowedProjectsSelect();
-  ['projectSelect','teamProject','hrProject'].forEach(id => {
-    const el = document.getElementById(id); if (!el) return;
-    const val = el.value;
-    const isTeam = id === 'teamProject';
-    el.innerHTML = isTeam ? '<option value="">-- Tất cả dự án --</option>' : '<option value="">-- Chọn dự án --</option>';
-    state.projects.forEach(p => el.innerHTML += `<option value="${p.id}">${p.code} — ${p.name}</option>`);
-    el.value = val;
-  });
-  // Project scope applied automatically in getAccessibleProjects() during checkin
-}
-
-function renderProjectList() {
-  const el = document.getElementById('projectList'); if (!el) return;
-  if (!state.projects.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">🗂</div>Chưa có dự án nào</div>'; return; }
-  el.innerHTML = `<div class="project-list">${state.projects.map(p => `
-    <div class="project-item">
-      <div class="pcode">${p.code}</div>
-      <div class="pinfo">
-        <div class="pname">${p.name}</div>
-        <div class="paddr">📍 ${p.address||'—'} &nbsp;|&nbsp; ${p.lat?.toFixed(4)}, ${p.lng?.toFixed(4)}</div>
-      </div>
-      <div class="pradius">R:${p.radius_m}m</div>
-      <button class="btn-edit-sm" onclick="editProject('${p.id}')">✏️</button>
-      <button class="btn-icon-sm" onclick="deleteProject('${p.id}','${p.name}')">🗑</button>
-    </div>`).join('')}</div>`;
-}
-
-async function saveProject() {
-  const editId = document.getElementById('editProjectId').value;
-  const code = document.getElementById('pjCode').value.trim();
-  const name = document.getElementById('pjName').value.trim();
-  const addr = document.getElementById('pjAddr').value.trim();
-  const lat = parseFloat(document.getElementById('pjLat').value);
-  const lng = parseFloat(document.getElementById('pjLng').value);
-  const radius = parseInt(document.getElementById('pjRadius').value) || 250;
-  if (!code||!name||isNaN(lat)||isNaN(lng)) { showToast('⚠️ Điền đầy đủ mã, tên, tọa độ'); return; }
-  try {
-    if (editId) {
-      await sbFetch(`projects?id=eq.${editId}`, { method:'PATCH', body: JSON.stringify({code,name,address:addr,lat,lng,radius_m:radius}) });
-      showToast('✅ Đã cập nhật dự án '+name);
-    } else {
-      await sbFetch('projects', { method:'POST', body: JSON.stringify({code,name,address:addr,lat,lng,radius_m:radius}) });
-      showToast('✅ Đã thêm dự án '+name);
-    }
-    cancelEditProject();
-    await loadProjects();
-  } catch(e) { showToast('❌ '+e.message); }
-}
-
-function editProject(id) {
-  const p = state.projects.find(x => x.id === id); if (!p) return;
-  document.getElementById('editProjectId').value = p.id;
-  document.getElementById('pjCode').value = p.code;
-  document.getElementById('pjName').value = p.name;
-  document.getElementById('pjAddr').value = p.address || '';
-  document.getElementById('pjLat').value = p.lat;
-  document.getElementById('pjLng').value = p.lng;
-  document.getElementById('pjRadius').value = p.radius_m;
-  document.getElementById('projectFormTitle').textContent = 'Chỉnh sửa dự án';
-  document.getElementById('btnCancelEdit').style.display = 'inline-block';
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function cancelEditProject() {
-  document.getElementById('editProjectId').value = '';
-  ['pjCode','pjName','pjAddr','pjLat','pjLng'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('pjRadius').value = 250;
-  document.getElementById('projectFormTitle').textContent = 'Thêm dự án mới';
-  document.getElementById('btnCancelEdit').style.display = 'none';
-}
-
-async function deleteProject(id, name) {
-  if (!confirm(`Xóa dự án "${name}"?`)) return;
-  try {
-    await sbFetch(`projects?id=eq.${id}`, { method:'PATCH', body: JSON.stringify({is_active:false}) });
-    showToast('✅ Đã xóa dự án '+name);
-    await loadProjects();
-  } catch(e) { showToast('❌ '+e.message); }
-}
-
-function getCurrentLocation() {
-  if (!navigator.geolocation) { showToast('⚠️ Trình duyệt không hỗ trợ GPS'); return; }
-  navigator.geolocation.getCurrentPosition(pos => {
-    document.getElementById('pjLat').value = pos.coords.latitude.toFixed(6);
-    document.getElementById('pjLng').value = pos.coords.longitude.toFixed(6);
-    showToast('📍 Đã lấy vị trí hiện tại');
-  }, () => showToast('❌ Không lấy được vị trí'));
-}
-
-// ── USERS ──
-async function loadUsers() {
-  try {
-    let url = 'users?is_active=eq.true&order=full_name';
-    if (state.currentUser.role==='site_admin' && state.currentUser.project_id)
-      url += `&project_id=eq.${state.currentUser.project_id}`;
-    state.users = await sbFetch(url);
-    renderUserList();
-  } catch(e) { console.error(e); }
-}
-
-// ── USER LIST FILTER + SORT ──
-let userSortCol = 'full_name';
-let userSortDir = 1; // 1=asc, -1=desc
-
-function populateFilterProjectSelect() {
-  const el = document.getElementById('filterProject'); if(!el) return;
-  const val = el.value;
-  el.innerHTML = '<option value="">Tất cả dự án</option>';
-  state.projects.forEach(p => el.innerHTML += `<option value="${p.id}">${p.code} — ${p.name}</option>`);
-  el.value = val;
-}
-
-function filterUsers() {
-  const name = (document.getElementById('filterName')?.value||'').toLowerCase().trim();
-  const projectId = document.getElementById('filterProject')?.value||'';
-  const role = document.getElementById('filterRole')?.value||'';
-  let filtered = state.users.filter(u => {
-    const matchName = !name ||
-      u.full_name.toLowerCase().includes(name) ||
-      (u.email||'').toLowerCase().includes(name) ||
-      (u.employee_code||'').toLowerCase().includes(name);
-    const matchProject = !projectId || u.project_id===projectId ||
-      u.project_scope==='all' ||
-      (u.allowed_projects&&u.allowed_projects.includes(projectId));
-    const matchRole = !role || u.role===role;
-    return matchName && matchProject && matchRole;
-  });
-  // Sort
-  filtered.sort((a,b) => {
-    let va = a[userSortCol]||'', vb = b[userSortCol]||'';
-    if(typeof va==='string') va=va.toLowerCase();
-    if(typeof vb==='string') vb=vb.toLowerCase();
-    return va<vb ? -userSortDir : va>vb ? userSortDir : 0;
-  });
-  const countEl = document.getElementById('filterCount');
-  if(countEl) countEl.textContent = filtered.length===state.users.length
-    ? `Tổng: ${state.users.length} nhân sự`
-    : `Hiển thị ${filtered.length} / ${state.users.length} nhân sự`;
-  renderUserListData(filtered);
-}
-
-function sortUserBy(col) {
-  if(userSortCol===col) userSortDir*=-1; else { userSortCol=col; userSortDir=1; }
-  filterUsers();
-}
-
-function clearFilterUsers() {
-  ['filterName','filterProject','filterRole'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.value='';
-  });
-  filterUsers();
-}
-
-function renderUserList() {
-  populateFilterProjectSelect();
-  filterUsers();
-}
-
-function renderUserListData(users) {
-  const el = document.getElementById('userList'); if (!el) return;
-  if (!users.length) {
-    el.innerHTML='<div class="empty-state"><div class="empty-icon">👤</div>Không tìm thấy nhân sự nào</div>';
-    return;
-  }
-  const roleMap = {superadmin:'🔑 Super Admin',site_admin:'🛡 Admin CT',employee:'👷 Nhân viên'};
-  const sCols = [
-    ['employee_code','Mã NV'],['full_name','Họ tên'],['email','Email'],
-    ['position','Chức vụ'],['project_id','Dự án'],['role','Quyền'],['','']
-  ];
-  const thStyle = 'cursor:pointer;user-select:none;white-space:nowrap';
-  const arrow = col => col===userSortCol ? (userSortDir===1?' ↑':' ↓') : ' ↕';
-  const headers = sCols.map(([col,label])=>
-    col ? `<th style="${thStyle}" onclick="sortUserBy('${col}')">${label}${arrow(col)}</th>`
-        : '<th></th>'
-  ).join('');
-  el.innerHTML = `<div class="att-table-wrap"><table>
-    <thead><tr>${headers}</tr></thead>
-    <tbody>${users.map((u,i) => {
-      const proj = state.projects.find(p=>p.id===u.project_id);
-      const rowBg = i%2===0?'':'background:rgba(255,255,255,.02)';
-      return `<tr style="${rowBg}">
-        <td style="font-family:monospace;color:var(--accent)">${u.employee_code||'—'}</td>
-        <td style="color:var(--text);font-weight:500">${u.full_name}</td>
-        <td style="font-size:12px">${u.email||'—'}</td>
-        <td>${u.position||'—'}</td>
-        <td>${
-          u.project_scope==='all' ? '<span style="color:var(--blue);font-size:12px">🌐 Tất cả</span>' :
-          u.project_scope==='multi' ? `<span style="color:var(--accent);font-size:12px">🗂 Đa dự án (${(u.allowed_projects||[]).length})</span>` :
-          (proj?proj.code:'—')
-        }</td>
-        <td><span class="badge badge-present">${roleMap[u.role]||u.role}</span></td>
-        <td style="display:flex;gap:6px">
-          <button class="btn-edit-sm" onclick="editUser('${u.id}')">✏️</button>
-          <button class="btn-icon-sm" onclick="deactivateUser('${u.id}','${u.full_name}')">🗑</button>
-        </td>
-      </tr>`;
-    }).join('')}</tbody>
-  </table></div>`;
-}
-
-function onScopeChange() {
-  const scope = document.getElementById('hrScope').value;
-  document.getElementById('fixedProjectRow').style.display = scope === 'fixed' ? 'block' : 'none';
-  document.getElementById('multiProjectRow').style.display = scope === 'multi' ? 'block' : 'none';
-}
-
-function populateAllowedProjectsSelect() {
-  const el = document.getElementById('hrAllowedProjects'); if(!el) return;
-  const vals = Array.from(el.selectedOptions).map(o=>o.value);
-  el.innerHTML = state.projects.map(p => `<option value="${p.id}" ${vals.includes(p.id)?'selected':''}>${p.code} — ${p.name}</option>`).join('');
-}
-
-function editUser(id) {
-  const u = state.users.find(x=>x.id===id); if(!u) return;
-  document.getElementById('editUserId').value = u.id;
-  document.getElementById('hrName').value = u.full_name;
-  document.getElementById('hrCode').value = u.employee_code || '';
-  document.getElementById('hrEmail').value = u.email || '';
-  document.getElementById('hrPhone').value = u.phone || '';
-  document.getElementById('hrPosition').value = u.position || '';
-  document.getElementById('hrRole').value = u.role;
-  document.getElementById('hrScope').value = u.project_scope || 'fixed';
-  document.getElementById('hrProject').value = u.project_id || '';
-  document.getElementById('hrJoinDate').value = u.join_date || '';
-  onScopeChange();
-  populateAllowedProjectsSelect();
-  // Pre-select allowed projects
-  if (u.allowed_projects) {
-    const sel = document.getElementById('hrAllowedProjects');
-    Array.from(sel.options).forEach(o => { o.selected = u.allowed_projects.includes(o.value); });
-  }
-  document.getElementById('btnSaveUser').textContent = 'Lưu thay đổi';
-  document.getElementById('btnCancelUser').style.display = 'inline-block';
-  document.querySelector('#tab-hrprofile .card-title').textContent = 'Chỉnh sửa nhân sự';
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function cancelEditUser() {
-  document.getElementById('editUserId').value = '';
-  ['hrName','hrCode','hrEmail','hrPhone','hrPosition','hrJoinDate'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('hrRole').value = 'employee';
-  document.getElementById('hrScope').value = 'fixed';
-  document.getElementById('hrProject').value = '';
-  onScopeChange();
-  document.getElementById('btnSaveUser').textContent = 'Thêm nhân sự';
-  document.getElementById('btnCancelUser').style.display = 'none';
-  document.querySelector('#tab-hrprofile .card-title').textContent = 'Thêm nhân sự mới';
-}
-
-async function saveUser() {
-  const editId = document.getElementById('editUserId').value;
-  const scope = document.getElementById('hrScope').value;
-  const allowedSel = document.getElementById('hrAllowedProjects');
-  const allowedProjects = scope === 'multi'
-    ? Array.from(allowedSel.selectedOptions).map(o=>o.value)
-    : null;
-  const body = {
-    full_name: document.getElementById('hrName').value.trim(),
-    employee_code: document.getElementById('hrCode').value.trim() || null,
-    email: document.getElementById('hrEmail').value.trim(),
-    phone: document.getElementById('hrPhone').value.trim() || null,
-    position: document.getElementById('hrPosition').value.trim() || null,
-    role: document.getElementById('hrRole').value,
-    project_id: scope === 'fixed' ? (document.getElementById('hrProject').value || null) : null,
-    project_scope: scope,
-    allowed_projects: allowedProjects,
-    join_date: document.getElementById('hrJoinDate').value || null,
-    is_active: true
-  };
-  if (!body.full_name||!body.email) { showToast('⚠️ Cần có họ tên và email'); return; }
-  if (scope==='multi' && (!allowedProjects||allowedProjects.length===0)) { showToast('⚠️ Chọn ít nhất 1 dự án'); return; }
-  try {
-    if (editId) {
-      await sbFetch(`users?id=eq.${editId}`, { method:'PATCH', body: JSON.stringify(body) });
-      showToast('✅ Đã cập nhật '+body.full_name);
-    } else {
-      await sbFetch('users', { method:'POST', body: JSON.stringify(body) });
-      showToast('✅ Đã thêm '+body.full_name+' — đăng nhập bằng Gmail là vào được');
-    }
-    cancelEditUser();
-    await loadUsers();
-  } catch(e) { showToast('❌ '+e.message); }
-}
-
-async function deactivateUser(id, name) {
-  if (!confirm(`Vô hiệu hóa nhân sự "${name}"?`)) return;
-  try {
-    await sbFetch(`users?id=eq.${id}`, { method:'PATCH', body: JSON.stringify({is_active:false}) });
-    showToast('✅ Đã vô hiệu hóa '+name);
-    await loadUsers();
-  } catch(e) { showToast('❌ '+e.message); }
-}
-
-// ── CLOCK ──
-function startClock() {
-  function tick() {
-    const now = new Date();
-    document.getElementById('timeDisplay').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-    document.getElementById('dateDisplay').textContent = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
-    document.getElementById('dayDisplay').textContent = DAYS[now.getDay()];
-  }
-  tick(); setInterval(tick, 1000);
-}
-
-// ── CHECK TODAY ──
-async function checkTodayAttendance() {
-  const today = localDateStr();
-  try {
-    const rows = await sbFetch(`attendance?user_id=eq.${state.currentUser.id}&check_date=eq.${today}&limit=1`);
-    if (rows.length) {
-      state.checkedInToday = true;
-      const t = new Date(rows[0].check_time);
-      document.getElementById('checkinResult').innerHTML = `✅ Đã chấm công lúc <strong>${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}</strong>`;
-      const btn = document.getElementById('checkinBtn');
-      btn.classList.add('done'); btn.querySelector('.btn-label').textContent='ĐÃ CHẤM';
-    }
-  } catch(e) { console.error(e); }
-}
-
-// ── DEVICE FINGERPRINT ──
-async function getDeviceFingerprint() {
-  const canvas = document.createElement('canvas');
-  const gl = canvas.getContext('webgl');
-  const debugInfo = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
-  const gpu = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'unknown';
-  const data = [
-    navigator.userAgent, navigator.language,
-    screen.width + 'x' + screen.height, screen.colorDepth,
-    new Date().getTimezoneOffset(),
-    navigator.hardwareConcurrency || 0,
-    navigator.deviceMemory || 0, gpu
-  ].join('|');
-  let hash = 0;
-  for (let i = 0; i < data.length; i++) { hash = ((hash << 5) - hash) + data.charCodeAt(i); hash |= 0; }
-  return Math.abs(hash).toString(16).padStart(8,'0');
-}
-
-
-// ── GET ACCESSIBLE PROJECTS BY SCOPE ──
-function getAccessibleProjects() {
-  const scope = state.currentUser.project_scope || 'fixed';
-  if (scope === 'all') return state.projects;
-  if (scope === 'multi') {
-    const allowed = state.currentUser.allowed_projects || [];
-    return state.projects.filter(p => allowed.includes(p.id));
-  }
-  return state.projects.filter(p => p.id === state.currentUser.project_id);
-}
-
-// ── AUTO-DETECT CHECKIN ──
-async function doCheckin() {
-  if (state.checkedInToday) { showToast('⚠️ Hôm nay đã chấm công rồi'); return; }
-  if (!navigator.geolocation) { showToast('⚠️ Trình duyệt không hỗ trợ GPS'); return; }
-
-  const btn = document.getElementById('checkinBtn');
-  const locDot = document.getElementById('locDot');
-  const locText = document.getElementById('locText');
-  const result = document.getElementById('checkinResult');
-  const detectedDiv = document.getElementById('detectedProject');
-  const detectedName = document.getElementById('detectedProjectName');
-  const manualRow = document.getElementById('manualProjectRow');
-
-  btn.disabled = true;
-  locDot.className = 'loc-dot checking';
-  locText.textContent = 'Đang lấy vị trí GPS...';
-  result.textContent = '⏳ Đang xác định vị trí...';
-  detectedDiv.style.display = 'none';
-  manualRow.style.display = 'none';
-
-  navigator.geolocation.getCurrentPosition(async pos => {
-    const { latitude, longitude, accuracy } = pos.coords;
-    locText.textContent = `Độ chính xác: ±${Math.round(accuracy)}m`;
-
-    const accessible = getAccessibleProjects();
-    const matches = accessible
-      .map(p => ({ ...p, dist: Math.round(calcDistance(latitude, longitude, p.lat, p.lng)) }))
-      .filter(p => p.dist <= p.radius_m)
-      .sort((a, b) => a.dist - b.dist);
-
-    if (matches.length === 0) {
-      locDot.className = 'loc-dot fail';
-      const nearest = accessible
-        .map(p => ({ ...p, dist: Math.round(calcDistance(latitude, longitude, p.lat, p.lng)) }))
-        .sort((a, b) => a.dist - b.dist)[0];
-      result.innerHTML = nearest
-        ? `❌ Không trong phạm vi dự án nào — gần nhất: <strong>${nearest.name}</strong> (cách ${nearest.dist}m, giới hạn ${nearest.radius_m}m)`
-        : '❌ Không tìm thấy dự án nào được phép';
-      btn.disabled = false;
-      return;
-    }
-
-    if (matches.length === 1) {
-      locDot.className = 'loc-dot ok';
-      locText.textContent = `📍 ${matches[0].name} — cách ${matches[0].dist}m | Độ chính xác: ±${Math.round(accuracy)}m`;
-      detectedName.textContent = `🏗️ ${matches[0].code} — ${matches[0].name} (cách ${matches[0].dist}m)`;
-      detectedDiv.style.display = 'block';
-      await submitCheckin(matches[0].id, latitude, longitude, matches[0].dist, result, btn);
-    } else {
-      locDot.className = 'loc-dot ok';
-      locText.textContent = `Phát hiện ${matches.length} dự án gần đây`;
-      const sel = document.getElementById('projectSelect');
-      sel.innerHTML = '<option value="">-- Chọn dự án --</option>' +
-        matches.map(p => `<option value="${p.id}">${p.code} — ${p.name} (${p.dist}m)</option>`).join('');
-      manualRow.style.display = 'block';
-      result.textContent = 'Chọn dự án bên trên rồi nhấn Xác nhận';
-      btn.disabled = false;
-    }
-  }, () => {
-    locDot.className = 'loc-dot fail';
-    locText.textContent = 'Không lấy được vị trí';
-    result.textContent = '❌ Không lấy được GPS. Kiểm tra quyền vị trí trên trình duyệt.';
-    btn.disabled = false;
-  }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
-}
-
-async function confirmManualCheckin() {
-  const projectId = document.getElementById('projectSelect').value;
-  if (!projectId) { showToast('⚠️ Chọn dự án trước'); return; }
-  const proj = state.projects.find(p => p.id === projectId);
-  const result = document.getElementById('checkinResult');
-  const btn = document.getElementById('checkinBtn');
-  btn.disabled = true;
-  result.textContent = '⏳ Đang chấm công...';
-  navigator.geolocation.getCurrentPosition(async pos => {
-    const dist = Math.round(calcDistance(pos.coords.latitude, pos.coords.longitude, proj.lat, proj.lng));
-    await submitCheckin(projectId, pos.coords.latitude, pos.coords.longitude, dist, result, btn);
-  }, () => { result.textContent = '❌ Không lấy được GPS'; btn.disabled = false; },
-  { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
-}
-
-async function submitCheckin(projectId, latitude, longitude, dist, result, btn) {
-  const today = localDateStr();
-  try {
-    const fingerprint = await getDeviceFingerprint();
-    const sameDevice = await sbFetch(`attendance?check_date=eq.${today}&device_fingerprint=eq.${fingerprint}&user_id=neq.${state.currentUser.id}&limit=5`);
-    if (sameDevice.length > 0) {
-      const names = sameDevice.map(r => {
-        const u = state.users.find(x => x.id === r.user_id);
-        return u ? u.full_name : 'Người khác';
-      }).join(', ');
-      showToast('⚠️ Phát hiện chấm công hộ — đã cảnh báo HR');
-    }
-    await sbFetch('attendance', { method: 'POST', body: JSON.stringify({
-      user_id: state.currentUser.id, project_id: projectId,
-      check_date: today, check_time: new Date().toISOString(),
-      lat: latitude, lng: longitude, distance_m: dist, status: 'present',
-      device_fingerprint: fingerprint, is_suspicious: sameDevice.length > 0
-    })});
-    state.checkedInToday = true;
-    btn.classList.add('done');
-    btn.querySelector('.btn-label').textContent = 'ĐÃ CHẤM';
-    const now = new Date();
-    const proj = state.projects.find(p => p.id === projectId);
-    result.innerHTML = `✅ Chấm công thành công lúc <strong>${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</strong> tại ${proj?.name || ''} — cách ${dist}m`;
-    showToast('✅ Chấm công thành công!');
-    document.getElementById('myMonth').value = now.getMonth() + 1;
-    document.getElementById('myYear').value = now.getFullYear();
-    document.getElementById('manualProjectRow').style.display = 'none';
-    document.getElementById('detectedProject').style.display = 'none';
-  } catch(e) {
-    if (e.message.includes('unique')) { result.innerHTML = '⚠️ Đã chấm công hôm nay rồi'; state.checkedInToday = true; }
-    else result.innerHTML = '❌ ' + e.message;
-    btn.disabled = false;
-  }
-}
-
-// ── GEOFENCING ──
-function calcDistance(lat1,lng1,lat2,lng2) {
-  const R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
-  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
-
-
-// ── MY ATTENDANCE ──
-function populateMonthSelectors() {
-  const now=new Date();
-  [['myMonth','myYear'],['teamMonth','teamYear']].forEach(([mId,yId]) => {
-    const mEl=document.getElementById(mId), yEl=document.getElementById(yId);
-    if(!mEl||!yEl) return;
-    mEl.innerHTML=MONTHS_VI.map((m,i)=>`<option value="${i+1}" ${i+1===now.getMonth()+1?'selected':''}>${m}</option>`).join('');
-    yEl.innerHTML='';
-    for(let y=now.getFullYear();y>=now.getFullYear()-2;y--)
-      yEl.innerHTML+=`<option value="${y}" ${y===now.getFullYear()?'selected':''}>${y}</option>`;
-  });
-}
-
-async function loadMyAttendance() {
-  const month=parseInt(document.getElementById('myMonth').value);
-  const year=parseInt(document.getElementById('myYear').value);
-  const el=document.getElementById('myTableContent');
-  el.innerHTML='<div class="loading"><span class="spinner"></span> Đang tải...</div>';
-  // Chu kỳ công: 26 tháng trước → 25 tháng này
-  const prevMonth = month === 1 ? 12 : month - 1;
-  const prevYear = month === 1 ? year - 1 : year;
-  const startDate=`${prevYear}-${String(prevMonth).padStart(2,'0')}-26`;
-  const endDate=`${year}-${String(month).padStart(2,'0')}-25`;
-  try {
-    const rows=await sbFetch(`attendance?user_id=eq.${state.currentUser.id}&check_date=gte.${startDate}&check_date=lte.${endDate}&order=check_date`);
-    state.lastAttData={rows,month,year,user:state.currentUser};
-    renderMyTable(rows,month,year);
-  } catch(e) { el.innerHTML='<div class="empty-state">❌ '+e.message+'</div>'; }
-}
-
-function renderMyTable(rows,month,year) {
-  // Build date array: 26 prev month → 25 curr month
-  const prevMonth = month === 1 ? 12 : month - 1;
-  const prevYear = month === 1 ? year - 1 : year;
-  const dateList = [];
-  for(let d=26; d<=31; d++) {
-    const dt = new Date(prevYear, prevMonth-1, d);
-    if(dt.getMonth() === prevMonth-1) dateList.push(dt);
-  }
-  for(let d=1; d<=25; d++) {
-    dateList.push(new Date(year, month-1, d));
-  }
-  const byDate={};
-  rows.forEach(r=>byDate[r.check_date]=r);
-  let present=0,absent=0,leave=0;
-  const statusMap={present:['badge-present','✅ Có mặt'],absent:['badge-absent','❌ Vắng'],leave:['badge-leave','🏖️ Nghỉ phép'],holiday:['badge-holiday','🎌 Nghỉ lễ']};
-  let tableRows='';
-  for(const dt of dateList) {
-    const dateStr=localDateStr(dt);
-    const isWe=false; // Tất cả các ngày đều tính công
-    const r=byDate[dateStr];
-    let bClass='',bLabel='';
-    if(r){[bClass,bLabel]=statusMap[r.status]||['','—'];if(r.status==='present')present++;else if(r.status==='absent')absent++;else if(r.status==='leave')leave++;}
-    const ct=r?new Date(r.check_time):null;
-    const proj=state.projects.find(p=>p.id===r?.project_id);
-    const dLabel=`${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}`;
-    tableRows+=`<tr style="">
-      <td style="font-family:monospace">${dLabel}</td>
-      <td>${DAYS[dt.getDay()]}</td>
-      <td>${r?`<span class="badge ${bClass}">${bLabel}</span>`:(isWe?'<span style="color:var(--text3);font-size:11px">Nghỉ</span>':'<span class="badge badge-absent">— Chưa có</span>')}</td>
-      <td style="font-family:monospace;font-size:12px">${ct?`${ct.getHours()}:${String(ct.getMinutes()).padStart(2,'0')}`:'—'}</td>
-      <td style="font-size:12px;color:var(--text3)">${r?.distance_m?r.distance_m+'m':'—'}</td>
-      <td style="font-size:12px;color:var(--text3)">${proj?proj.code:'—'}</td>
-    </tr>`;
-  }
-  const totalDays = dateList.length;
-  document.getElementById('myStats').innerHTML=`
-    <div class="stat-card"><div class="stat-value" style="color:var(--green)">${present}</div><div class="stat-label">Ngày công</div></div>
-    <div class="stat-card"><div class="stat-value" style="color:var(--red)">${absent}</div><div class="stat-label">Vắng mặt</div></div>
-    <div class="stat-card"><div class="stat-value" style="color:var(--blue)">${leave}</div><div class="stat-label">Nghỉ phép</div></div>
-    <div class="stat-card"><div class="stat-value" style="color:var(--accent)">${totalDays-present-absent-leave}</div><div class="stat-label">Chưa có DL</div></div>`;
-  document.getElementById('myTableContent').innerHTML=`<table>
-    <thead><tr><th>#</th><th>Thứ</th><th>Trạng thái</th><th>Giờ chấm</th><th>Khoảng cách</th><th>Dự án</th></tr></thead>
-    <tbody>${tableRows}</tbody></table>`;
-}
-
-// ── TEAM ATTENDANCE ──
-async function loadTeamAttendance() {
-  const month=parseInt(document.getElementById('teamMonth').value);
-  const year=parseInt(document.getElementById('teamYear').value);
-  const projectId=document.getElementById('teamProject').value;
-  const el=document.getElementById('teamTableContent');
-  el.innerHTML='<div class="loading"><span class="spinner"></span> Đang tải...</div>';
-  // Chu kỳ công: 26 tháng trước → 25 tháng này
-  const prevMonth = month === 1 ? 12 : month - 1;
-  const prevYear = month === 1 ? year - 1 : year;
-  const startDate=`${prevYear}-${String(prevMonth).padStart(2,'0')}-26`;
-  const endDate=`${year}-${String(month).padStart(2,'0')}-25`;
-  const daysInMonth=new Date(year,month,0).getDate();
-  try {
-    let userUrl='users?is_active=eq.true&order=full_name';
-    if(projectId) userUrl+=`&project_id=eq.${projectId}`;
-    else if(state.currentUser.role==='site_admin'&&state.currentUser.project_id)
-      userUrl+=`&project_id=eq.${state.currentUser.project_id}`;
-    let attUrl=`attendance?check_date=gte.${startDate}&check_date=lte.${endDate}`;
-    if(projectId) attUrl+=`&project_id=eq.${projectId}`;
-    const [users,attRows]=await Promise.all([sbFetch(userUrl),sbFetch(attUrl)]);
-    if(!users.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">👥</div>Không có nhân sự nào</div>';return;}
-    const attByUser={};
-    attRows.forEach(r=>{if(!attByUser[r.user_id])attByUser[r.user_id]={};attByUser[r.user_id][r.check_date]=r;});
-    state.lastTeamData={users,attByUser,month,year,daysInMonth,projectId};
-    renderTeamTable(users,attByUser,month,year,daysInMonth,el);
-  } catch(e){el.innerHTML='<div class="empty-state">❌ '+e.message+'</div>';}
-}
-
-function renderTeamTable(users,attByUser,month,year,daysInMonth,el) {
-  const dayHeaders=Array.from({length:daysInMonth},(_,i)=>{
-    const d=new Date(year,month-1,i+1);
-    const isWe=false; // Tất cả ngày tính công
-    return `<th style="text-align:center;${isWe?'color:var(--text3)':''}">${i+1}</th>`;
-  }).join('');
-  const tableRows=users.map(u=>{
-    const att=attByUser[u.id]||{};
-    let total=0;
-    const cells=Array.from({length:daysInMonth},(_,i)=>{
-      const dateStr=`${year}-${String(month).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;
-      const dt=new Date(dateStr);
-      const isWe=false; // Tất cả các ngày đều tính công
-      const r=att[dateStr];
-      if(r?.status==='present'||r?.status==='leave') total++;
-      const cell=r?(r.status==='present'?'✅':r.status==='leave'?'🏖':'❌'):(isWe?'':' ');
-      return `<td style="text-align:center;font-size:12px;${''}">${cell}</td>`;
-    }).join('');
-    return `<tr><td style="white-space:nowrap;font-weight:500;color:var(--text)">${u.full_name}</td><td style="text-align:center;font-family:monospace;color:var(--accent);font-weight:700">${total}</td>${cells}</tr>`;
-  }).join('');
-  el.innerHTML=`<div style="overflow-x:auto"><table>
-    <thead><tr><th>Họ tên</th><th style="text-align:center">Tổng</th>${dayHeaders}</tr></thead>
-    <tbody>${tableRows}</tbody></table></div>`;
-}
-
-// ── EXPORT EXCEL ──
-
-
-
-// ── EXPORT EXCEL CÁ NHÂN ──
-async function exportMyExcel() {
-  if(!state.lastAttData){showToast('⚠️ Xem bảng công trước');return;}
-  showToast('⏳ Đang tạo file Excel...');
-  const {rows,month,year,user}=state.lastAttData;
-  const prevMonth=month===1?12:month-1, prevYear=month===1?year-1:year;
-  const dateList=[];
-  for(let d=26;d<=31;d++){const dt=new Date(prevYear,prevMonth-1,d);if(dt.getMonth()===prevMonth-1)dateList.push(dt);}
-  for(let d=1;d<=25;d++){dateList.push(new Date(year,month-1,d));}
-  const byDate={};rows.forEach(r=>byDate[r.check_date]=r);
-
-  const NAVY='0D2137',ORANGE='F5A623',WHITE='FFFFFF',GREY='F5F7FA';
-  const GREEN='27C47A',GREEN2='E8F8F1',RED='E85555',RED2='FDE8E8';
-  const BLUE2='E8F1FD',TEXT='1A2B3C',LGREY='EAF0F6';
-  const DAYS_VI=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
-  const statusLabel={present:'✅ Có mặt',absent:'❌ Vắng',leave:'🏖 Nghỉ phép',holiday:'🎌 Nghỉ lễ'};
-  const statusColor={present:GREEN,absent:RED,leave:'4A9EFF',holiday:ORANGE};
-  const statusBg={present:GREEN2,absent:RED2,leave:BLUE2,holiday:'FFF3DC'};
-
-  function hFill(h){return {type:'pattern',pattern:'solid',fgColor:{argb:'FF'+h}};}
-  function hBorder(){const s={style:'thin',color:{argb:'FFC5CDD8'}};return {left:s,right:s,top:s,bottom:s};}
-  function hFont(bold,color,size){return {name:'Arial',bold:!!bold,color:{argb:'FF'+(color||TEXT)},size:size||10};}
-
-  const wb=new ExcelJS.Workbook();
-  const ws=wb.addWorksheet('Tháng '+month+'.'+year);
-  ws.columns=[{width:12},{width:11},{width:16},{width:12},{width:14},{width:14},{width:4},{width:24},{width:4}];
-
-  // R1 - Logo
-  ws.mergeCells('A1:I1'); ws.getRow(1).height=36;
-  Object.assign(ws.getCell('A1'),{value:'VELA E&C',font:hFont(true,ORANGE,16),fill:hFill(NAVY),alignment:{horizontal:'left',vertical:'middle'}});
-
-  // R2 - Title
-  ws.mergeCells('A2:I2'); ws.getRow(2).height=28;
-  Object.assign(ws.getCell('A2'),{
-    value:'BẢNG CHẤM CÔNG THÁNG '+String(month).padStart(2,'0')+'/'+year+'  (26/'+String(prevMonth).padStart(2,'0')+'/'+prevYear+' – 25/'+String(month).padStart(2,'0')+'/'+year+')',
-    font:hFont(true,WHITE,12),fill:hFill(NAVY),alignment:{horizontal:'center',vertical:'middle'}
-  });
-
-  // R3 - Sub
-  ws.mergeCells('A3:I3'); ws.getRow(3).height=20;
-  const proj0=state.currentUser.project_id?state.projects.find(p=>p.id===state.currentUser.project_id):null;
-  Object.assign(ws.getCell('A3'),{
-    value:'Phát hành: Lê Trần Anh Toàn – Vela E&C – 0978.635.450',
-    font:{name:'Arial',italic:true,color:{argb:'FF5A7A96'},size:9},
-    fill:hFill(LGREY),alignment:{horizontal:'center',vertical:'middle'}
-  });
-
-  ws.getRow(4).height=8;
-
-  // R5 - Employee info
-  ws.getRow(5).height=22;
-  [['A','Nhân viên:','5A7A96'],['B',user.full_name,TEXT],['D','Mã NV:','5A7A96'],['E',user.employee_code||'—',TEXT],['G','Dự án:','5A7A96'],['H',proj0?proj0.name:'—',TEXT]]
-  .forEach(([col,val,color])=>{Object.assign(ws.getCell(col+'5'),{value:val,font:hFont(null,color,10),alignment:{horizontal:'left',vertical:'middle'}});});
-
-  ws.getRow(6).height=8;
-
-  // R7 - Headers
-  ws.getRow(7).height=24;
-  ['Ngày','Thứ','Trạng thái','Giờ chấm','Khoảng cách','Dự án','','Ghi chú',''].forEach((h,i)=>{
-    if(!h) return;
-    const c=ws.getCell(7,i+1);
-    c.value=h; c.font=hFont(true,WHITE,10); c.fill=hFill(NAVY);
-    c.alignment={horizontal:'center',vertical:'middle'}; c.border=hBorder();
-  });
-
-  // Data
-  let present=0,absent=0,leave=0;
-  dateList.forEach((dt,idx)=>{
-    const dateStr=localDateStr(dt), rec=byDate[dateStr], rn=idx+8;
-    ws.getRow(rn).height=20;
-    const bg=rec?(statusBg[rec.status]||WHITE):(idx%2===0?WHITE:GREY);
-    const ct=rec?new Date(rec.check_time):null;
-    const projRec=rec?state.projects.find(p=>p.id===rec.project_id):null;
-    if(rec?.status==='present')present++;
-    else if(rec?.status==='absent')absent++;
-    else if(rec?.status==='leave')leave++;
-    [String(dt.getDate()).padStart(2,'0')+'/'+String(dt.getMonth()+1).padStart(2,'0'),
-     DAYS_VI[dt.getDay()],
-     rec?(statusLabel[rec.status]||''):'',
-     ct?ct.getHours()+':'+String(ct.getMinutes()).padStart(2,'0'):'',
-     rec?.distance_m?rec.distance_m+'m':'',
-     projRec?projRec.code:'','','',''
-    ].forEach((v,i)=>{
-      const c=ws.getCell(rn,i+1);
-      c.value=v; c.fill=hFill(bg); c.border=hBorder();
-      c.alignment={horizontal:i===7?'left':'center',vertical:'middle'};
-      c.font=i===2&&rec?{name:'Arial',bold:true,color:{argb:'FF'+(statusColor[rec.status]||TEXT)},size:10}:hFont(false,TEXT,10);
-    });
-  });
-
-  // Spacer + Summary
-  const spR=dateList.length+8; ws.getRow(spR).height=8;
-  const sumR=spR+1; ws.getRow(sumR).height=28;
-  ws.mergeCells('A'+sumR+':B'+sumR);
-  Object.assign(ws.getCell('A'+sumR),{value:'TỔNG KẾT',font:hFont(true,WHITE,10),fill:hFill(NAVY),alignment:{horizontal:'center',vertical:'middle'}});
-  [['C','✅ Ngày công',present,GREEN2,GREEN],['D','❌ Vắng mặt',absent,RED2,RED],
-   ['E','🏖 Nghỉ phép',leave,BLUE2,'4A9EFF'],['F','📋 Tổng ngày',dateList.length,LGREY,NAVY]]
-  .forEach(([col,label,val,bg,tc])=>{
-    const c=ws.getCell(col+sumR);
-    c.value=label+': '+val; c.font={name:'Arial',bold:true,color:{argb:'FF'+tc},size:10};
-    c.fill=hFill(bg); c.alignment={horizontal:'center',vertical:'middle'}; c.border=hBorder();
-  });
-
-  ws.views=[{state:'frozen',ySplit:7,xSplit:0}];
-  const buf=await wb.xlsx.writeBuffer();
-  const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='BangCong_'+user.full_name.replace(/ /g,'_')+'_T'+month+'_'+year+'.xlsx';
-  a.click(); showToast('✅ Đã xuất Excel!');
-}
-
-// ── EXPORT EXCEL NHÓM ──
-async function exportTeamExcel() {
-  if(!state.lastTeamData){showToast('⚠️ Xem bảng công nhóm trước');return;}
-  showToast('⏳ Đang tạo file Excel...');
-  const {users,attByUser,month,year}=state.lastTeamData;
-  const prevMonth=month===1?12:month-1, prevYear=month===1?year-1:year;
-  const dateList=[];
-  for(let d=26;d<=31;d++){const dt=new Date(prevYear,prevMonth-1,d);if(dt.getMonth()===prevMonth-1)dateList.push(dt);}
-  for(let d=1;d<=25;d++){dateList.push(new Date(year,month-1,d));}
-  const proj=state.lastTeamData.projectId?state.projects.find(p=>p.id===state.lastTeamData.projectId):null;
-
-  const NAVY='0D2137',ORANGE='F5A623',WHITE='FFFFFF',GREY='F5F7FA';
-  const GREEN='27C47A',GREEN2='E8F8F1',RED='E85555',RED2='FDE8E8';
-  const BLUE2='E8F1FD',TEXT='1A2B3C',LGREY='EAF0F6',ORANGE2='FFF3DC';
-
-  function hFill(h){return {type:'pattern',pattern:'solid',fgColor:{argb:'FF'+h}};}
-  function hBorder(){const s={style:'thin',color:{argb:'FFC5CDD8'}};return {left:s,right:s,top:s,bottom:s};}
-
-  const wb=new ExcelJS.Workbook();
-  const ws=wb.addWorksheet('T'+month+'.'+year);
-  ws.columns=[{width:24},{width:12},...dateList.map(()=>({width:7}))];
-
-  // R1
-  ws.mergeCells(1,1,1,dateList.length+2); ws.getRow(1).height=32;
-  Object.assign(ws.getCell('A1'),{
-    value:'VELA E&C  –  BẢNG CHẤM CÔNG NHÓM THÁNG '+String(month).padStart(2,'0')+'/'+year+'  (26/'+String(prevMonth).padStart(2,'0')+'/'+prevYear+' – 25/'+String(month).padStart(2,'0')+'/'+year+')'+(proj?' — '+proj.name:' — TẤT CẢ DỰ ÁN'),
-    font:{name:'Arial',bold:true,color:{argb:'FF'+WHITE},size:12},
-    fill:hFill(NAVY),alignment:{horizontal:'center',vertical:'middle'}
-  });
-
-  // R2
-  ws.mergeCells(2,1,2,dateList.length+2); ws.getRow(2).height=18;
-  Object.assign(ws.getCell('A2'),{
-    value:'Phát hành: Lê Trần Anh Toàn – Vela E&C – 0978.635.450',
-    font:{name:'Arial',italic:true,color:{argb:'FF5A7A96'},size:9},
-    fill:hFill(LGREY),alignment:{horizontal:'center',vertical:'middle'}
-  });
-  ws.getRow(3).height=8;
-
-  // R4 Headers
-  ws.getRow(4).height=28;
-  ['Họ tên','Tổng công'].forEach((h,i)=>{
-    const c=ws.getCell(4,i+1);
-    c.value=h; c.font={name:'Arial',bold:true,color:{argb:'FF'+WHITE},size:10};
-    c.fill=hFill(NAVY); c.alignment={horizontal:'center',vertical:'middle'}; c.border=hBorder();
-  });
-  dateList.forEach((dt,i)=>{
-    const c=ws.getCell(4,i+3);
-    c.value=String(dt.getDate()).padStart(2,'0')+'/'+String(dt.getMonth()+1).padStart(2,'0');
-    c.font={name:'Arial',bold:true,color:{argb:'FF'+WHITE},size:8};
-    c.fill=hFill(NAVY); c.alignment={horizontal:'center',vertical:'middle'}; c.border=hBorder();
-  });
-
-  // Data
-  users.forEach((u,ri)=>{
-    const rn=ri+5, bg=ri%2===0?WHITE:GREY;
-    ws.getRow(rn).height=22;
-    const att=attByUser[u.id]||{}; let total=0;
-    Object.assign(ws.getCell(rn,1),{value:u.full_name,font:{name:'Arial',bold:true,color:{argb:'FF'+TEXT},size:10},fill:hFill(bg),alignment:{horizontal:'left',vertical:'middle'},border:hBorder()});
-    dateList.forEach((dt,i)=>{
-      const rec=att[localDateStr(dt)];
-      const c=ws.getCell(rn,i+3);
-      if(rec?.status==='present'){c.value='✅';c.fill=hFill(GREEN2);c.font={name:'Arial',color:{argb:'FF'+GREEN},size:10};total++;}
-      else if(rec?.status==='leave'){c.value='🏖';c.fill=hFill(BLUE2);c.font={name:'Arial',color:{argb:'FF4A9EFF'},size:10};total++;}
-      else if(rec?.status==='absent'){c.value='❌';c.fill=hFill(RED2);c.font={name:'Arial',color:{argb:'FF'+RED},size:10};}
-      else{c.value='';c.fill=hFill(bg);}
-      c.alignment={horizontal:'center',vertical:'middle'}; c.border=hBorder();
-    });
-    Object.assign(ws.getCell(rn,2),{value:total,font:{name:'Arial',bold:true,color:{argb:'FF'+ORANGE},size:12},fill:hFill(ORANGE2),alignment:{horizontal:'center',vertical:'middle'},border:hBorder()});
-  });
-
-  ws.views=[{state:'frozen',ySplit:4,xSplit:2}];
-  const buf=await wb.xlsx.writeBuffer();
-  const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='BangCong_Nhom_T'+month+'_'+year+(proj?'_'+proj.code:'')+'.xlsx';
-  a.click(); showToast('✅ Đã xuất Excel!');
-}
-
-// ── WARNINGS ──
-async function loadWarnings() {
-  const el = document.getElementById('warningList'); if(!el) return;
-  el.innerHTML = '<div class="loading"><span class="spinner"></span> Đang tải...</div>';
-  try {
-    const rows = await sbFetch('attendance?is_suspicious=eq.true&order=check_date.desc&limit=100');
-    if(!rows.length) {
-      el.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div>Chưa phát hiện trường hợp bất thường</div>';
-      return;
-    }
-    // Group by fingerprint + date
-    const groups = {};
-    rows.forEach(r => {
-      const key = r.device_fingerprint + '_' + r.check_date;
-      if(!groups[key]) groups[key] = [];
-      groups[key].push(r);
-    });
-    const cards = Object.entries(groups).map(([key, items]) => {
-      const names = items.map(r => {
-        const u = state.users.find(x => x.id === r.user_id);
-        return u ? u.full_name : r.user_id;
-      });
-      const date = items[0].check_date;
-      const fp = items[0].device_fingerprint;
-      return `<div style="background:rgba(232,85,85,.08);border:1px solid rgba(232,85,85,.25);border-radius:12px;padding:16px;margin-bottom:10px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="color:var(--red);font-weight:600;font-size:14px">⚠️ Chấm công hộ nghi ngờ</span>
-          <span style="font-family:monospace;font-size:12px;color:var(--text3)">${date}</span>
-        </div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:6px">
-          <strong style="color:var(--text)">${names.join(' & ')}</strong> — cùng thiết bị
-        </div>
-        <div style="font-size:11px;color:var(--text3);font-family:monospace">Device ID: ${fp}</div>
-      </div>`;
-    }).join('');
-    el.innerHTML = cards;
-  } catch(e) { el.innerHTML = '<div class="empty-state">❌ ' + e.message + '</div>'; }
-}
-
-// ── TABS ──
-function switchTab(btn, id) {
-  document.querySelectorAll('.tab-pane').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(el=>el.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  btn.classList.add('active');
-}
-
-// ── TOAST ──
-function showToast(msg) {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
-}
-
-// ── AUTO LOGIN + GOOGLE CALLBACK ──
-(async()=>{
-  // Check Google OAuth callback (hash fragment)
-  const hash=window.location.hash;
-  if(hash.includes('access_token')) {
-    const params=new URLSearchParams(hash.substring(1));
-    const session={
-      access_token:params.get('access_token'),
-      refresh_token:params.get('refresh_token'),
-      user:{ email: null }
-    };
-    // Get user info
-    try {
-      const res=await fetch(`${SUPABASE_URL}/auth/v1/user`,{
-        headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+session.access_token}
-      });
-      const u=await res.json();
-      session.user=u;
-      state.session=session;
-      localStorage.setItem('vela_session',JSON.stringify(session));
-      window.history.replaceState(null,'',window.location.pathname);
-      await initApp(); return;
-    } catch(e){console.error(e);}
-  }
-  // Check saved session
-  const saved=localStorage.getItem('vela_session');
-  if(saved){
-    try{
-      state.session=JSON.parse(saved);
-      await initApp();
-    }catch(e){localStorage.removeItem('vela_session');}
-  }
-})();
-</script>
 </body>
 </html>
