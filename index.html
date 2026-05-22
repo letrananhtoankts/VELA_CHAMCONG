@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0f1923">
 <title>Vela ChamCong</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
   :root {
@@ -906,8 +906,11 @@ async function loadMyAttendance() {
   const year=parseInt(document.getElementById('myYear').value);
   const el=document.getElementById('myTableContent');
   el.innerHTML='<div class="loading"><span class="spinner"></span> Đang tải...</div>';
-  const startDate=`${year}-${String(month).padStart(2,'0')}-01`;
-  const endDate=localDateStr(new Date(year,month,0));
+  // Chu kỳ công: 26 tháng trước → 25 tháng này
+  const prevMonth = month === 1 ? 12 : month - 1;
+  const prevYear = month === 1 ? year - 1 : year;
+  const startDate=`${prevYear}-${String(prevMonth).padStart(2,'0')}-26`;
+  const endDate=`${year}-${String(month).padStart(2,'0')}-25`;
   try {
     const rows=await sbFetch(`attendance?user_id=eq.${state.currentUser.id}&check_date=gte.${startDate}&check_date=lte.${endDate}&order=check_date`);
     state.lastAttData={rows,month,year,user:state.currentUser};
@@ -916,23 +919,33 @@ async function loadMyAttendance() {
 }
 
 function renderMyTable(rows,month,year) {
-  const daysInMonth=new Date(year,month,0).getDate();
+  // Build date array: 26 prev month → 25 curr month
+  const prevMonth = month === 1 ? 12 : month - 1;
+  const prevYear = month === 1 ? year - 1 : year;
+  const dateList = [];
+  for(let d=26; d<=31; d++) {
+    const dt = new Date(prevYear, prevMonth-1, d);
+    if(dt.getMonth() === prevMonth-1) dateList.push(dt);
+  }
+  for(let d=1; d<=25; d++) {
+    dateList.push(new Date(year, month-1, d));
+  }
   const byDate={};
   rows.forEach(r=>byDate[r.check_date]=r);
   let present=0,absent=0,leave=0;
   const statusMap={present:['badge-present','✅ Có mặt'],absent:['badge-absent','❌ Vắng'],leave:['badge-leave','🏖️ Nghỉ phép'],holiday:['badge-holiday','🎌 Nghỉ lễ']};
   let tableRows='';
-  for(let d=1;d<=daysInMonth;d++) {
-    const dateStr=`${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dt=new Date(dateStr);
+  for(const dt of dateList) {
+    const dateStr=localDateStr(dt);
     const isWe=false; // Tất cả các ngày đều tính công
     const r=byDate[dateStr];
     let bClass='',bLabel='';
     if(r){[bClass,bLabel]=statusMap[r.status]||['','—'];if(r.status==='present')present++;else if(r.status==='absent')absent++;else if(r.status==='leave')leave++;}
     const ct=r?new Date(r.check_time):null;
     const proj=state.projects.find(p=>p.id===r?.project_id);
+    const dLabel=`${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}`;
     tableRows+=`<tr style="">
-      <td style="font-family:monospace">${d}</td>
+      <td style="font-family:monospace">${dLabel}</td>
       <td>${DAYS[dt.getDay()]}</td>
       <td>${r?`<span class="badge ${bClass}">${bLabel}</span>`:(isWe?'<span style="color:var(--text3);font-size:11px">Nghỉ</span>':'<span class="badge badge-absent">— Chưa có</span>')}</td>
       <td style="font-family:monospace;font-size:12px">${ct?`${ct.getHours()}:${String(ct.getMinutes()).padStart(2,'0')}`:'—'}</td>
@@ -940,11 +953,12 @@ function renderMyTable(rows,month,year) {
       <td style="font-size:12px;color:var(--text3)">${proj?proj.code:'—'}</td>
     </tr>`;
   }
+  const totalDays = dateList.length;
   document.getElementById('myStats').innerHTML=`
     <div class="stat-card"><div class="stat-value" style="color:var(--green)">${present}</div><div class="stat-label">Ngày công</div></div>
     <div class="stat-card"><div class="stat-value" style="color:var(--red)">${absent}</div><div class="stat-label">Vắng mặt</div></div>
     <div class="stat-card"><div class="stat-value" style="color:var(--blue)">${leave}</div><div class="stat-label">Nghỉ phép</div></div>
-    <div class="stat-card"><div class="stat-value" style="color:var(--accent)">${daysInMonth-present-absent-leave}</div><div class="stat-label">Chưa có DL</div></div>`;
+    <div class="stat-card"><div class="stat-value" style="color:var(--accent)">${totalDays-present-absent-leave}</div><div class="stat-label">Chưa có DL</div></div>`;
   document.getElementById('myTableContent').innerHTML=`<table>
     <thead><tr><th>#</th><th>Thứ</th><th>Trạng thái</th><th>Giờ chấm</th><th>Khoảng cách</th><th>Dự án</th></tr></thead>
     <tbody>${tableRows}</tbody></table>`;
@@ -957,8 +971,11 @@ async function loadTeamAttendance() {
   const projectId=document.getElementById('teamProject').value;
   const el=document.getElementById('teamTableContent');
   el.innerHTML='<div class="loading"><span class="spinner"></span> Đang tải...</div>';
-  const startDate=`${year}-${String(month).padStart(2,'0')}-01`;
-  const endDate=localDateStr(new Date(year,month,0));
+  // Chu kỳ công: 26 tháng trước → 25 tháng này
+  const prevMonth = month === 1 ? 12 : month - 1;
+  const prevYear = month === 1 ? year - 1 : year;
+  const startDate=`${prevYear}-${String(prevMonth).padStart(2,'0')}-26`;
+  const endDate=`${year}-${String(month).padStart(2,'0')}-25`;
   const daysInMonth=new Date(year,month,0).getDate();
   try {
     let userUrl='users?is_active=eq.true&order=full_name';
@@ -1042,7 +1059,8 @@ function exportTeamExcel() {
     return [u.full_name,total,...cells];
   });
   const proj=state.projects.find(p=>p.id===state.lastTeamData.projectId);
-  const titleRow=[`BẢNG CHẤM CÔNG THÁNG ${month}/${year}${proj?' — '+proj.name:' — TẤT CẢ DỰ ÁN'}`];
+  const expPM=month===1?12:month-1, expPY=month===1?year-1:year;
+  const titleRow=[`BẢNG CHẤM CÔNG THÁNG ${month}/${year} (26/${expPM}/${expPY} — 25/${month}/${year})${proj?' — '+proj.name:' — TẤT CẢ DỰ ÁN'}`];
   const data=[titleRow,[],header,...rows];
   const ws=XLSX.utils.aoa_to_sheet(data);
   const wb=XLSX.utils.book_new();
