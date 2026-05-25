@@ -877,7 +877,7 @@ async function doCheckin() {
     const locDot = document.getElementById('locDot');
     locDot.className = 'loc-dot fail';
     document.getElementById('locText').textContent = 'Thiết bị không hợp lệ';
-    result.innerHTML = `<div style="color:var(--red);line-height:1.7;white-space:pre-line">${deviceCheck.reason}</div>`;
+    result.innerHTML = `<div style="color:var(--red);text-align:center;padding:8px">${deviceCheck.reason}</div>`;
     showToast('❌ Chỉ được chấm công bằng điện thoại');
     return;
   }
@@ -1021,11 +1021,7 @@ function checkDeviceAllowed() {
   if (!isMobileDevice()) {
     return {
       allowed: false,
-      reason: '🖥️ Chấm công chỉ được thực hiện trên điện thoại di động.
-
-Laptop và máy tính không được phép để tránh chấm công hộ.
-
-Vui lòng dùng điện thoại của bạn.'
+      reason: '🖥️ Chỉ được chấm công bằng điện thoại. Laptop không được phép.'
     };
   }
   return { allowed: true };
@@ -1035,17 +1031,7 @@ function checkGpsAccuracy(accuracy) {
   // Laptop WiFi positioning usually > 200m accuracy
   // Real phone GPS usually < 100m
   if (accuracy > 150) {
-    return {
-      allowed: false,
-      reason: `📡 Tín hiệu GPS quá yếu (độ chính xác: ±${Math.round(accuracy)}m).
-
-Yêu cầu độ chính xác tốt hơn 150m.
-
-Vui lòng:
-• Ra ngoài trời
-• Bật GPS trên điện thoại
-• Tắt WiFi nếu đang dùng`
-    };
+    return { allowed: false, reason: `📡 GPS yếu (±${Math.round(accuracy)}m). Cần dưới 150m. Ra ngoài trời, bật GPS.` };
   }
   return { allowed: true };
 }
